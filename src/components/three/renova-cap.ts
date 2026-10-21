@@ -1,20 +1,20 @@
 import * as THREE from "three";
 import {
   DEFAULT_DIMENSIONS,
-  frontSurfaceTilt,
-  frontSurfaceZ,
+  profileAt,
   type BagDimensions,
-} from "./renova-bag-geometry";
+} from "./renova-bag-metrics";
 
 /**
  * Sistema de cierre de la bolsa RENOVA.
  *
- * Piezas independientes de la textura del envase:
- *  - marco rectangular con abertura (asa integrada), construido con
- *    ExtrudeGeometry a partir de un contorno con hueco real
+ * Piezas independientes de la textura del envase (no se imprimen en el
+ * atlas, son mallas propias):
+ *  - marco rectangular de esquinas redondeadas con una abertura real (asa)
  *  - alojamiento circular del tapon, con capas concentricas
- *  - tapon cilindrico con estrías verticales, superficie superior
- *    ligeramente convexa y detalle central
+ *  - tapon cilindrico con estrias verticales y superficie superior convexa
+ *
+ * El conjunto se apoya sobre la cara superior del envase, sin atravesarlo.
  */
 
 export const CAP_COLORS = {
@@ -28,23 +28,30 @@ export const CAP_COLORS = {
 
 export type ClosureOptions = {
   /** altura (en unidades de mundo) donde se fija el cierre */
-  height: number;
-  /** ancho del marco del asa */
+  height?: number;
+  /** ancho del marco del asa (eje X) */
   baseWidth: number;
-  /** alto del marco del asa */
+  /** fondo del marco del asa (eje Z) */
   baseHeight: number;
+  /** desplazamiento en X del marco respecto al centro del envase */
+  handleOffsetX: number;
   /** radio del tapon */
   capRadius: number;
   /** numero de estrias del tapon */
   ribs: number;
+  /** posicion del grifo (tapón) sobre la cara superior */
+  spoutX: number;
+  spoutZ: number;
 };
 
 export const DEFAULT_CLOSURE: ClosureOptions = {
-  height: 1.5,
-  baseWidth: 0.36,
+  baseWidth: 0.38,
   baseHeight: 0.2,
-  capRadius: 0.048,
-  ribs: 28,
+  handleOffsetX: -0.2,
+  capRadius: 0.047,
+  ribs: 30,
+  spoutX: 0.21,
+  spoutZ: 0,
 };
 
 function satinPlastic(color: string, roughness = 0.42) {
@@ -54,8 +61,9 @@ function satinPlastic(color: string, roughness = 0.42) {
     metalness: 0,
     clearcoat: 0.35,
     clearcoatRoughness: 0.45,
-    sheen: 0.15,
-    sheenColor: new THREE.Color("#8fc7a8"),
+    sheen: 0.18,
+    sheenColor: new THREE.Color("#9fd0b4"),
+    envMapIntensity: 0.7,
   });
 }
 
@@ -98,20 +106,21 @@ function slotPath(width: number, height: number, centerY: number): THREE.Path {
 /** Marco del asa: pieza rectangular con hueco interior real. */
 function createHandleFrame(options: ClosureOptions): THREE.Mesh {
   const shape = new THREE.Shape();
-  roundedRect(shape, options.baseWidth, options.baseHeight, 0.028, 0);
+  roundedRect(shape, options.baseWidth, options.baseHeight, 0.026, 0);
 
-  const slotHeight = 0.05;
-  const slotWidth = options.baseWidth * 0.58;
-  shape.holes.push(slotPath(slotWidth, slotHeight, options.baseHeight * 0.24));
+  // Ranura del asa: abertura real y centrada.
+  const slotHeight = 0.048;
+  const slotWidth = options.baseWidth * 0.56;
+  shape.holes.push(slotPath(slotWidth, slotHeight, 0));
 
-  const depth = 0.02;
+  const depth = 0.018;
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth,
     bevelEnabled: true,
-    bevelThickness: 0.003,
-    bevelSize: 0.003,
+    bevelThickness: 0.0025,
+    bevelSize: 0.0025,
     bevelSegments: 2,
-    curveSegments: 16,
+    curveSegments: 18,
   });
   geometry.translate(0, 0, -depth / 2);
   geometry.computeVertexNormals();
@@ -122,27 +131,26 @@ function createHandleFrame(options: ClosureOptions): THREE.Mesh {
   return mesh;
 }
 
-/** Alojamiento circular del tapon: capas concentricas. */
+/** Alojamiento circular del tapon: capas concentricas sobre la cara superior. */
 function createCapSeat(radius: number): THREE.Group {
   const group = new THREE.Group();
   const layers = [
-    { r: radius * 1.22, h: 0.008, z: 0.012, color: CAP_COLORS.frame },
-    { r: radius * 1.06, h: 0.010, z: 0.020, color: CAP_COLORS.seat },
-    { r: radius * 0.96, h: 0.010, z: 0.030, color: CAP_COLORS.base },
+    { r: radius * 1.32, h: 0.007, y: 0.0025, color: CAP_COLORS.frame },
+    { r: radius * 1.12, h: 0.009, y: 0.0105, color: CAP_COLORS.seat },
+    { r: radius, h: 0.009, y: 0.0195, color: CAP_COLORS.base },
   ];
 
   for (const layer of layers) {
     const geometry = new THREE.CylinderGeometry(
       layer.r,
-      layer.r * 1.02,
+      layer.r * 1.04,
       layer.h,
-      48,
+      56,
       1,
       false,
     );
-    geometry.rotateX(Math.PI / 2);
     const mesh = new THREE.Mesh(geometry, satinPlastic(layer.color, 0.44));
-    mesh.position.z = layer.z + layer.h / 2;
+    mesh.position.y = layer.y;
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     group.add(mesh);
@@ -156,7 +164,7 @@ function createScrewCap(radius: number, ribs: number): THREE.Group {
   const group = new THREE.Group();
 
   const profile: THREE.Vector2[] = [
-    new THREE.Vector2(radius * 0.82, 0.0),
+    new THREE.Vector2(radius * 0.84, 0.0),
     new THREE.Vector2(radius * 0.99, 0.0),
     new THREE.Vector2(radius, 0.004),
     new THREE.Vector2(radius, radius * 0.82),
@@ -169,14 +177,14 @@ function createScrewCap(radius: number, ribs: number): THREE.Group {
 
   const geometry = new THREE.LatheGeometry(profile, 96);
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
-  const ribAmplitude = 0.035;
+  const ribAmplitude = 0.032;
   for (let i = 0; i < position.count; i++) {
     const x = position.getX(i);
     const y = position.getY(i);
     const z = position.getZ(i);
     const radial = Math.hypot(x, z);
     if (radial < 1e-5) continue;
-    // Solo la pared vertical lleva estrías
+    // Solo la pared vertical lleva estrias
     if (y > radius * 0.08 && y < radius * 0.86) {
       const theta = Math.atan2(z, x);
       const scale = 1 + ribAmplitude * Math.cos(theta * ribs);
@@ -208,7 +216,6 @@ function createScrewCap(radius: number, ribs: number): THREE.Group {
 
   // Anillo fino bajo el borde (detalle de rosca)
   const ringGeometry = new THREE.TorusGeometry(radius * 0.99, radius * 0.055, 10, 64);
-  ringGeometry.rotateX(Math.PI / 2);
   const ring = new THREE.Mesh(ringGeometry, satinPlastic(CAP_COLORS.rib, 0.38));
   ring.position.y = radius * 0.22;
   ring.castShadow = true;
@@ -217,10 +224,41 @@ function createScrewCap(radius: number, ribs: number): THREE.Group {
   return group;
 }
 
+/**
+ * Construye el cierre verde sobre la cara superior del envase.
+ * El marco del asa queda tumbado sobre el sellado y el grifo (alojamiento +
+ * tapon) emerge de la cara superior, sin atravesar la malla de la bolsa.
+ */
 export function createClosure(
   options: ClosureOptions = DEFAULT_CLOSURE,
   dims: BagDimensions = DEFAULT_DIMENSIONS,
 ): THREE.Group {
   const group = new THREE.Group();
+  const topY = options.height ?? dims.height;
+  const top = profileAt(topY, dims);
+
+  // Marco del asa: tumbado sobre la cara superior.
+  const frame = createHandleFrame(options);
+  frame.rotation.x = -Math.PI / 2;
+  frame.position.set(options.handleOffsetX, topY + 0.001, 0);
+  group.add(frame);
+
+  // Alojamiento + tapon (grifo) sobre la cara superior.
+  const seat = createCapSeat(options.capRadius);
+  seat.position.set(options.spoutX, topY - 0.002, options.spoutZ);
+  group.add(seat);
+
+  const cap = createScrewCap(options.capRadius, options.ribs);
+  cap.position.set(options.spoutX, topY + 0.021, options.spoutZ);
+  group.add(cap);
+
+  // La cara superior real esta algo por debajo del borde en las esquinas:
+  // el cierre se mantiene dentro del ancho util del envase.
+  const maxX = top.halfWidth - options.capRadius * 1.4;
+  if (Math.abs(options.spoutX) > maxX) {
+    cap.position.x = Math.sign(options.spoutX) * maxX;
+    seat.position.x = cap.position.x;
+  }
+
   return group;
 }

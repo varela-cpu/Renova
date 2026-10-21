@@ -1,41 +1,56 @@
 /**
  * Atlas UV de la bolsa RENOVA.
  *
- * Un único PNG (generado en runtime con Canvas 2D) que cubre TODAS las caras
- * de la bolsa. Las regiones se definen una sola vez aqui y son la fuente de
- * verdad tanto para el pintado (canvas) como para el mapeo UV de la geometria.
+ * Un unico canvas (pintado en runtime con Canvas 2D) que cubre TODAS las
+ * caras del envase. El layout se deriva de las medidas reales de la bolsa
+ * (`BAG_METRICS`), de forma que cada region mantiene la relacion de aspecto de
+ * la cara que textura: nada queda estirado ni duplicado.
  *
- * El arte se pinta como un "panorama" continuo de 2590 x 1792 px que recorre
- * todo el perimetro de la bolsa (frontal -> esquina -> lateral -> esquina ->
- * trasera -> ...). Cada region del atlas es un recorte de ese panorama, de
- * modo que las costuras entre caras coinciden exactamente y las ondas
- * continues de una cara a la otra.
+ * Organizacion del atlas (3072 x 2048 px):
+ *
+ *   y=0                        y=1580
+ *   +--------------------------+   +-----------+-----------+
+ *   | FRONT|CFR|RIGHT|CBR|BACK |   |    TOP    |  BOTTOM   |
+ *   | CBL|LEFT|CFL              |   |           |           |
+ *   +--------------------------+   +-----------+-----------+
+ *   x=0                     2672
+ *
+ * El cuerpo se pinta como un "panorama" continuo (FRONT -> esquina -> lateral
+ * -> ... -> CFL -> vuelta a FRONT) para que los motivos vegetales crucen de una
+ * cara a la siguiente sin cortes.
  *
  * Sistema de coordenadas del canvas: origen arriba-izquierda, y hacia abajo.
  * Sistema UV de Three.js: origen abajo-izquierda, v hacia arriba.
  */
 
+import { BAG_METRICS } from "./renova-bag-metrics";
+
+/** Paleta corporativa RENOVA. */
 export const PALETTE = {
-  forest: "#145B45",
-  leaf: "#287A5D",
-  sage: "#A2B99A",
-  ivory: "#F3F0E5",
-  coral: "#F07863",
-  moss: "#3F5D3A",
-  sun: "#E8B14C",
-  ink: "#12362B",
+  /** papel kraft blanqueado / marfil calido */
+  paper: "#E8E0CC",
+  /** verde oscuro principal (marca) */
+  forest: "#174F3D",
+  /** verde medio */
+  green: "#34745A",
+  /** verde salvia (motivos y detalles) */
+  sage: "#91A783",
+  /** coral (acentos minimos) */
+  coral: "#E87560",
+  /** tinta para textos secundarios */
+  ink: "#2C463C",
 } as const;
 
 export const FONT_DISPLAY =
-  '"Futura", "Century Gothic", "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif';
+  '"Avenir Next", "Futura", "Century Gothic", "Montserrat", "Segoe UI", sans-serif';
 export const FONT_SANS =
   '"Avenir Next", "Segoe UI", "Trebuchet MS", system-ui, -apple-system, sans-serif';
 
-/** Atlas UV para la bolsa RENOVA - estilo papel ecológico artesanal */
-export const PX_PER_UNIT = 1024;
+/** Resolucion de la textura (px por unidad de mundo). */
+export const PIXELS_PER_UNIT = 1000;
 
-export const ATLAS_WIDTH = 2048;
-export const ATLAS_HEIGHT = 1536;
+export const ATLAS_WIDTH = 3072;
+export const ATLAS_HEIGHT = 2048;
 
 export type RegionId =
   | "FRONT"
@@ -51,55 +66,41 @@ export type RegionId =
 
 export type PixelRect = { x: number; y: number; w: number; h: number };
 
-/**
- * Medidas de referencia de la bolsa (cuerpo):
- *  - panel frontal plano : 0.78 unidades  -> 799 px
- *  - lateral plano       : 0.13 unidades  -> 136 px
- *  - arco de esquina     : 0.173 unidades -> 180 px
- *  - altura total        : 1.75 unidades  -> 1792 px
- */
-const FRONT_W = 799;
-const BODY_H = 1792;
-const SIDE_W = 136;
-const CORNER_W = 180;
-const CAP_H = 136;
+/* ------------------------------------------------------------------ */
+/* Medidas de las regiones (derivadas de la geometria real)           */
+/* ------------------------------------------------------------------ */
 
-/** Panorama continuo: perimetro completo de la bolsa. */
-export const PANORAMA_W = 2590;
-export const PANORAMA_H = BODY_H;
+const FRONT_W = Math.round(BAG_METRICS.frontWidth * PIXELS_PER_UNIT);
+const SIDE_W = Math.round(BAG_METRICS.sideWidth * PIXELS_PER_UNIT);
+const CORNER_W = Math.round(BAG_METRICS.cornerWidth * PIXELS_PER_UNIT);
+const BODY_H = Math.round(BAG_METRICS.bodyHeight * PIXELS_PER_UNIT);
+const TOP_W = Math.round(BAG_METRICS.topWidth * PIXELS_PER_UNIT);
+const TOP_H = Math.round(BAG_METRICS.topDepth * PIXELS_PER_UNIT);
 
-export const ATLAS_REGIONS: Record<RegionId, PixelRect> = {
-  FRONT: { x: 0, y: 0, w: FRONT_W, h: BODY_H },
-  CORNER_FR: { x: FRONT_W, y: 0, w: CORNER_W, h: BODY_H },
-  RIGHT: { x: FRONT_W + CORNER_W, y: 0, w: SIDE_W, h: BODY_H },
-  CORNER_BR: { x: FRONT_W + CORNER_W + SIDE_W, y: 0, w: CORNER_W, h: BODY_H },
-  BACK: {
-    x: FRONT_W + CORNER_W + SIDE_W + CORNER_W,
-    y: 0,
-    w: FRONT_W,
-    h: BODY_H,
-  },
-  CORNER_BL: {
-    x: FRONT_W + CORNER_W + SIDE_W + CORNER_W * 2,
-    y: 0,
-    w: CORNER_W,
-    h: BODY_H,
-  },
-  LEFT: {
-    x: FRONT_W + CORNER_W + SIDE_W + CORNER_W * 2 + CORNER_W,
-    y: 0,
-    w: SIDE_W,
-    h: BODY_H,
-  },
-  CORNER_FL: {
-    x: FRONT_W + CORNER_W + SIDE_W + CORNER_W * 3 + SIDE_W,
-    y: 0,
-    w: CORNER_W,
-    h: BODY_H,
-  },
-  TOP: { x: 0, y: BODY_H, w: FRONT_W, h: CAP_H },
-  BOTTOM: { x: FRONT_W, y: BODY_H, w: FRONT_W, h: CAP_H },
-};
+/** Ancho del panorama continuo (perimetro del cuerpo). */
+export const STRIP_W =
+  FRONT_W * 2 + SIDE_W * 2 + CORNER_W * 4;
+
+export const ATLAS_REGIONS: Record<RegionId, PixelRect> = (() => {
+  const regions = {} as Record<RegionId, PixelRect>;
+  let x = 0;
+  const add = (id: RegionId, w: number) => {
+    regions[id] = { x, y: 0, w, h: BODY_H };
+    x += w;
+  };
+  // El orden del panorama coincide con el recorrido de la geometria.
+  add("FRONT", FRONT_W);
+  add("CORNER_FR", CORNER_W);
+  add("RIGHT", SIDE_W);
+  add("CORNER_BR", CORNER_W);
+  add("BACK", FRONT_W);
+  add("CORNER_BL", CORNER_W);
+  add("LEFT", SIDE_W);
+  add("CORNER_FL", CORNER_W);
+  regions.TOP = { x: 0, y: BODY_H, w: TOP_W, h: TOP_H };
+  regions.BOTTOM = { x: TOP_W + 16, y: BODY_H, w: TOP_W, h: TOP_H };
+  return regions;
+})();
 
 export type UvRect = { u0: number; u1: number; v0: number; v1: number };
 
@@ -116,145 +117,50 @@ export function uvRectFromPixels(rect: PixelRect): UvRect {
 }
 
 /* ------------------------------------------------------------------ */
-/* Utilidades de dibujo                                                */
+/* Utilidades                                                          */
 /* ------------------------------------------------------------------ */
 
-function fillRect(
-  ctx: CanvasRenderingContext2D,
-  rect: PixelRect,
-  color: string,
-): void {
-  ctx.fillStyle = color;
-  ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+/** PRNG determinista: el arte es siempre el mismo en cada carga. */
+function makeRng(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a += 0x6d2b79f5;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-/** Banda ondulada que llena desde `baseY` hasta el borde inferior del area. */
-function waveBand(
+const rng = makeRng(0x5245_4e4f);
+
+function setFont(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  baseY: number,
-  amplitude: number,
-  frequency: number,
-  phase: number,
-  color: string,
+  size: number,
+  weight: number | string,
+  family: string,
 ): void {
-  ctx.beginPath();
-  ctx.moveTo(x, y + h);
-  ctx.lineTo(x, baseY);
-  const steps = Math.max(24, Math.round(w / 6));
-  for (let i = 0; i <= steps; i++) {
-    const px = x + (i / steps) * w;
-    const py =
-      baseY + Math.sin((i / steps) * frequency * Math.PI * 2 + phase) * amplitude;
-    ctx.lineTo(px, py);
-  }
-  ctx.lineTo(x + w, y + h);
-  ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.fill();
+  ctx.font = `${weight} ${size}px ${family}`;
 }
 
-/** Onda de trazo para lineas decorativas. */
-function waveStroke(
+/** Ancho de un texto con interletraje manual. */
+function _trackedWidth(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  baseY: number,
-  amplitude: number,
-  frequency: number,
-  phase: number,
-  color: string,
-  lineWidth: number,
-): void {
-  ctx.beginPath();
-  const steps = Math.max(24, Math.round(w / 6));
-  for (let i = 0; i <= steps; i++) {
-    const px = x + (i / steps) * w;
-    const py =
-      baseY + Math.sin((i / steps) * frequency * Math.PI * 2 + phase) * amplitude;
-    if (i === 0) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
-  }
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth;
-  ctx.stroke();
-}
-
-/** Hoja organica. */
-function leaf(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  length: number,
-  angle: number,
-  color: string,
-  alpha = 1,
-): void {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.translate(cx, cy);
-  ctx.rotate(angle);
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.bezierCurveTo(
-    length * 0.28,
-    -length * 0.36,
-    length * 0.74,
-    -length * 0.3,
-    length,
-    0,
+  text: string,
+  tracking: number,
+): number {
+  const chars = [...text];
+  const widths = chars.map((c) => ctx.measureText(c).width);
+  return (
+    widths.reduce((acc, w) => acc + w, 0) +
+    tracking * Math.max(0, chars.length - 1)
   );
-  ctx.bezierCurveTo(
-    length * 0.74,
-    length * 0.3,
-    length * 0.28,
-    length * 0.36,
-    0,
-    0,
-  );
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.restore();
 }
 
-/** Rama con hojas. */
-function branch(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  length: number,
-  angle: number,
-  color: string,
-  leaves = 5,
-  alpha = 1,
-): void {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.translate(cx, cy);
-  ctx.rotate(angle);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = Math.max(2, length * 0.02);
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.quadraticCurveTo(length * 0.5, -length * 0.14, length, 0);
-  ctx.stroke();
-  for (let i = 0; i < leaves; i++) {
-    const t = (i + 1) / (leaves + 1);
-    const lx = length * t;
-    const ly = -length * 0.14 * Math.sin(Math.PI * t);
-    const size = length * (0.32 - 0.09 * t);
-    leaf(ctx, lx, ly, size, -0.62, color);
-    leaf(ctx, lx, ly, size, 0.62, color);
-  }
-  ctx.restore();
-}
-
-/** Texto con interletraje manual (funciona en todos los navegadores). */
+/**
+ * Texto centrado con interletraje manual (funciona en todos los navegadores).
+ * `size` y `weight` controlan el cuerpo; el tracking se aplica por letra.
+ */
 function trackedText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -277,18 +183,400 @@ function trackedText(
   ctx.textAlign = previousAlign;
 }
 
-function setFont(
+/** Texto centrado en una sola linea, sin interletraje extra. */
+function plainText(
   ctx: CanvasRenderingContext2D,
-  size: number,
-  weight: number | string,
-  family: string,
-  italic = false,
+  text: string,
+  centerX: number,
+  y: number,
 ): void {
-  ctx.font = `${italic ? "italic " : ""}${weight} ${size}px ${family}`;
+  ctx.textAlign = "center";
+  ctx.fillText(text, centerX, y);
+  ctx.textAlign = "left";
 }
 
-/** Simbolo de reciclaje dibujado a mano (sin depender de una fuente). */
-function recycleMark(
+/* ------------------------------------------------------------------ */
+/* Capa 1: material base (papel kraft blanqueado)                      */
+/* ------------------------------------------------------------------ */
+
+/** Tile de ruido fino reutilizable (grano + fibras). */
+function createNoiseTile(size: number): HTMLCanvasElement {
+  const tile = document.createElement("canvas");
+  tile.width = size;
+  tile.height = size;
+  const ctx = tile.getContext("2d");
+  if (!ctx) return tile;
+
+  const image = ctx.createImageData(size, size);
+  const data = image.data;
+  const local = makeRng(0x9e37_79b9);
+  for (let i = 0; i < size * size; i++) {
+    const value = 128 + (local() - 0.5) * 26;
+    data[i * 4] = value;
+    data[i * 4 + 1] = value;
+    data[i * 4 + 2] = value;
+    data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+  return tile;
+}
+
+/** Variacion tonal muy suave: manchas de luz (no suciedad). */
+function paintTonalVariation(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  count: number,
+): void {
+  for (let i = 0; i < count; i++) {
+    const cx = x + rng() * w;
+    const cy = y + rng() * h;
+    const r = 240 + rng() * 620;
+    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    const warm = rng() > 0.45;
+    gradient.addColorStop(
+      0,
+      warm ? "rgba(206,194,165,0.13)" : "rgba(252,248,236,0.16)",
+    );
+    gradient.addColorStop(1, "rgba(232,224,204,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  }
+}
+
+/** Fibras de papel: trazos cortos, dispersos y de muy baja opacidad. */
+function paintFibers(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  count: number,
+): void {
+  ctx.lineCap = "round";
+  for (let pass = 0; pass < 2; pass++) {
+    ctx.strokeStyle =
+      pass === 0 ? "rgba(120,106,80,0.055)" : "rgba(255,252,242,0.075)";
+    ctx.lineWidth = 1;
+    const total = Math.round(count / 2);
+    for (let i = 0; i < total; i++) {
+      const px = x + rng() * w;
+      const py = y + rng() * h;
+      const len = 2 + rng() * 10;
+      const angle =
+        rng() < 0.62 ? (rng() - 0.5) * 0.7 : Math.PI / 2 + (rng() - 0.5) * 0.8;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
+      ctx.stroke();
+    }
+  }
+}
+
+/** Grano discreto sobre toda la superficie. */
+function paintGrain(
+  ctx: CanvasRenderingContext2D,
+  tile: HTMLCanvasElement,
+  alpha: number,
+): void {
+  const pattern = ctx.createPattern(tile, "repeat");
+  if (!pattern) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.globalCompositeOperation = "overlay";
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, ATLAS_WIDTH, ATLAS_HEIGHT);
+  ctx.restore();
+}
+
+/* ------------------------------------------------------------------ */
+/* Motivos botanicos                                                    */
+/* ------------------------------------------------------------------ */
+
+/** Hoja organica con bordes ligeramente irregulares. */
+function drawLeaf(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  length: number,
+  width: number,
+  angle: number,
+  color: string,
+  alpha = 1,
+  jitter = 0.08,
+): void {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  ctx.rotate(angle);
+  const j = () => (rng() - 0.5) * jitter * length;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(
+    length * 0.24,
+    -width * 0.52 + j(),
+    length * 0.74,
+    -width * 0.44 + j(),
+    length,
+    j() * 0.5,
+  );
+  ctx.bezierCurveTo(
+    length * 0.74,
+    width * 0.44 + j(),
+    length * 0.24,
+    width * 0.52 + j(),
+    0,
+    0,
+  );
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+}
+
+/** Ramita: tallo curvo con hojas alternas. */
+function drawSprig(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  length: number,
+  angle: number,
+  color: string,
+  leafColor: string,
+  leaves = 6,
+  alpha = 1,
+): void {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  ctx.rotate(angle);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(2, length * 0.022);
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(length * 0.5, -length * 0.12, length, -length * 0.02);
+  ctx.stroke();
+  for (let i = 0; i < leaves; i++) {
+    const t = (i + 1) / (leaves + 1);
+    const lx = length * t;
+    const ly = -length * 0.12 * Math.sin(Math.PI * t) - length * 0.02 * t;
+    const size = length * (0.3 - 0.08 * t);
+    drawLeaf(ctx, lx, ly, size, size * 0.5, -0.72, leafColor, 1, 0.1);
+    drawLeaf(ctx, lx, ly, size, size * 0.5, 0.72, leafColor, 1, 0.1);
+  }
+  ctx.restore();
+}
+
+/** Flor estilizada de petalos (centro coral). */
+function drawBloom(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  radius: number,
+  petalColor: string,
+  centerColor: string,
+  alpha = 1,
+): void {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  for (let i = 0; i < 5; i++) {
+    const angle = (i / 5) * Math.PI * 2 + 0.2;
+    drawLeaf(
+      ctx,
+      cx + Math.cos(angle) * radius * 0.42,
+      cy + Math.sin(angle) * radius * 0.42,
+      radius * 0.72,
+      radius * 0.36,
+      angle,
+      petalColor,
+      1,
+      0.07,
+    );
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.17, 0, Math.PI * 2);
+  ctx.fillStyle = centerColor;
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ------------------------------------------------------------------ */
+/* Capa 2: diseno impreso                                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Composicion frontal: una sola columna vertical sobre el fondo de papel,
+ * sin recuadros, sin bandas y sin contornos. El marfil continua uniforme
+ * detras de todos los textos.
+ */
+function drawFrontComposition(
+  ctx: CanvasRenderingContext2D,
+  options: AtlasOptions,
+): void {
+  const { w, h } = ATLAS_REGIONS.FRONT;
+  const cx = w / 2;
+  ctx.textBaseline = "middle";
+
+  // --- Marca -------------------------------------------------------
+  ctx.fillStyle = PALETTE.forest;
+  setFont(ctx, Math.round(h * 0.0835), 800, FONT_DISPLAY);
+  trackedText(ctx, "RENOVA", cx, h * 0.245, h * 0.0055);
+
+  // --- Eslogan -----------------------------------------------------
+  ctx.fillStyle = PALETTE.green;
+  setFont(ctx, Math.round(h * 0.0245), 500, FONT_SANS);
+  trackedText(ctx, "Limpieza que da mas vida", cx, h * 0.325, h * 0.0014);
+
+  // --- Categoria ---------------------------------------------------
+  ctx.fillStyle = PALETTE.forest;
+  setFont(ctx, Math.round(h * 0.0262), 700, FONT_SANS);
+  trackedText(ctx, "DETERGENTE EN POLVO", cx, h * 0.4, h * 0.0038);
+
+  // --- Fragancia ---------------------------------------------------
+  ctx.fillStyle = PALETTE.green;
+  setFont(ctx, Math.round(h * 0.0175), 600, FONT_SANS);
+  trackedText(ctx, "FRAGANCIA FLORAL", cx, h * 0.455, h * 0.005);
+
+  // --- Peso (integrado, sin etiqueta ni ovalo) ----------------------
+  const weightSize = Math.round(h * 0.042);
+  const unitSize = Math.round(h * 0.021);
+  setFont(ctx, weightSize, 800, FONT_DISPLAY);
+  const weightText = options.weightLabel.replace(/\s*kg\s*$/i, "");
+  const weightWidth = ctx.measureText(weightText).width;
+  setFont(ctx, unitSize, 600, FONT_SANS);
+  const unitWidth = ctx.measureText("kg").width;
+  const gap = weightSize * 0.14;
+  const total = weightWidth + gap + unitWidth;
+  let x = cx - total / 2;
+  ctx.fillStyle = PALETTE.forest;
+  setFont(ctx, weightSize, 800, FONT_DISPLAY);
+  ctx.textAlign = "left";
+  ctx.fillText(weightText, x, h * 0.528);
+  x += weightWidth + gap;
+  ctx.fillStyle = PALETTE.green;
+  setFont(ctx, unitSize, 600, FONT_SANS);
+  ctx.fillText("kg", x, h * 0.532);
+  ctx.textAlign = "left";
+
+  // --- Codigo interno (discreto, al pie) ----------------------------
+  ctx.fillStyle = "rgba(44,70,60,0.55)";
+  setFont(ctx, Math.round(h * 0.0105), 500, FONT_SANS);
+  trackedText(ctx, options.productCode, cx, h * 0.965, h * 0.0018);
+}
+
+/** Motivos botanicos de la cara frontal (esquinas y borde inferior). */
+function drawFrontBotanicals(ctx: CanvasRenderingContext2D): void {
+  const { w, h } = ATLAS_REGIONS.FRONT;
+
+  // --- Esquina superior izquierda (cruza hacia la esquina FL) ------
+  drawSprig(ctx, 8, 34, 300, 0.46, PALETTE.sage, PALETTE.sage, 6, 0.92);
+  drawSprig(ctx, -18, 168, 250, 0.2, PALETTE.green, PALETTE.green, 5, 0.7);
+  drawLeaf(ctx, 96, 116, 132, 58, 0.5, PALETTE.sage, 0.85);
+  drawLeaf(ctx, 214, 46, 108, 46, 0.28, PALETTE.green, 0.6);
+  drawBloom(ctx, 66, 250, 34, PALETTE.sage, PALETTE.coral, 0.8);
+
+  // --- Esquina superior derecha (cruza hacia la esquina FR) --------
+  drawSprig(ctx, w - 8, 34, 300, Math.PI - 0.46, PALETTE.sage, PALETTE.sage, 6, 0.92);
+  drawSprig(ctx, w + 18, 168, 250, Math.PI - 0.2, PALETTE.green, PALETTE.green, 5, 0.7);
+  drawLeaf(ctx, w - 96, 116, 132, 58, Math.PI - 0.5, PALETTE.sage, 0.85);
+  drawLeaf(ctx, w - 214, 46, 108, 46, Math.PI - 0.28, PALETTE.green, 0.6);
+  drawBloom(ctx, w - 66, 250, 34, PALETTE.sage, PALETTE.coral, 0.8);
+
+  // --- Bordes inferiores -------------------------------------------
+  drawSprig(ctx, 26, h + 24, 330, -0.78, PALETTE.green, PALETTE.green, 6, 0.85);
+  drawSprig(ctx, w - 26, h + 24, 330, -Math.PI + 0.78, PALETTE.green, PALETTE.green, 6, 0.85);
+  drawLeaf(ctx, 176, h - 26, 150, 62, -1.95, PALETTE.sage, 0.85);
+  drawLeaf(ctx, w - 176, h - 26, 150, 62, -1.19, PALETTE.sage, 0.85);
+  drawBloom(ctx, 74, h - 96, 30, PALETTE.sage, PALETTE.coral, 0.7);
+  drawBloom(ctx, w - 74, h - 96, 30, PALETTE.sage, PALETTE.coral, 0.7);
+}
+
+/** Cara trasera: composicion propia (uso, caracteristicas, precauciones). */
+function drawBackComposition(
+  ctx: CanvasRenderingContext2D,
+  options: AtlasOptions,
+): void {
+  const { w, h } = ATLAS_REGIONS.BACK;
+  const cx = w / 2;
+  ctx.textBaseline = "middle";
+
+  ctx.fillStyle = PALETTE.forest;
+  setFont(ctx, Math.round(h * 0.0295), 800, FONT_DISPLAY);
+  trackedText(ctx, "RENOVA", cx, h * 0.082, h * 0.004);
+
+  ctx.fillStyle = PALETTE.green;
+  setFont(ctx, Math.round(h * 0.0155), 500, FONT_SANS);
+  trackedText(ctx, "Limpieza que da mas vida", cx, h * 0.112, h * 0.0012);
+
+  const heading = (text: string, at: number) => {
+    ctx.fillStyle = PALETTE.forest;
+    setFont(ctx, Math.round(h * 0.0132), 700, FONT_SANS);
+    trackedText(ctx, text, cx, h * at, h * 0.0022);
+  };
+  const body = (rows: string[], from: number) => {
+    ctx.fillStyle = PALETTE.ink;
+    setFont(ctx, Math.round(h * 0.0108), 400, FONT_SANS);
+    rows.forEach((row, i) => {
+      plainText(ctx, row, cx, h * (from + i * 0.0215));
+    });
+  };
+
+  heading("INSTRUCCIONES DE USO", 0.185);
+  body(
+    [
+      "Lavado a mano: disuelva la dosis en agua,",
+      "lave segun el cuidado de la prenda y",
+      "enjuague bien.",
+      "Lavadora: agregue la dosis en el compartimiento",
+      "recomendado por el fabricante.",
+    ],
+    0.222,
+  );
+
+  heading("CARACTERISTICAS", 0.372);
+  body(
+    [
+      "Detergente en polvo de uso domestico.",
+      "Fragancia floral. Envase de 5 kg.",
+    ],
+    0.409,
+  );
+
+  heading("PRECAUCIONES", 0.495);
+  body(
+    [
+      "No usar para higiene personal ni para lavar",
+      "alimentos. No mezclar con otros limpiadores.",
+      "Mantener fuera del alcance de los ninos.",
+    ],
+    0.532,
+  );
+
+  // Marca de reciclaje dibujada a mano.
+  drawRecycleMark(ctx, cx, h * 0.72, h * 0.042, PALETTE.green);
+  ctx.fillStyle = PALETTE.forest;
+  setFont(ctx, Math.round(h * 0.0125), 700, FONT_SANS);
+  trackedText(
+    ctx,
+    `CONTENIDO NETO ${options.weightLabel.toUpperCase()}`,
+    cx,
+    h * 0.778,
+    h * 0.0018,
+  );
+
+  // Acentos botanicos en la parte trasera (mismo lenguaje visual).
+  drawSprig(ctx, 10, 26, 250, 0.42, PALETTE.sage, PALETTE.sage, 5, 0.8);
+  drawSprig(ctx, w - 10, 26, 250, Math.PI - 0.42, PALETTE.sage, PALETTE.sage, 5, 0.8);
+  drawLeaf(ctx, w * 0.5, h - 40, 170, 62, -1.57, PALETTE.sage, 0.75);
+  drawBloom(ctx, w * 0.5 - 150, h - 74, 30, PALETTE.sage, PALETTE.coral, 0.65);
+  drawBloom(ctx, w * 0.5 + 150, h - 74, 30, PALETTE.sage, PALETTE.coral, 0.65);
+}
+
+/** Simbolo de reciclaje trazado a mano. */
+function drawRecycleMark(
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
@@ -298,68 +586,178 @@ function recycleMark(
   const r = size / 2;
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = Math.max(2, size * 0.12);
+  ctx.fillStyle = color;
+  ctx.lineWidth = Math.max(2, size * 0.11);
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   for (let i = 0; i < 3; i++) {
     const a0 = (i / 3) * Math.PI * 2 - Math.PI / 2;
     const a1 = a0 + Math.PI * 0.62;
     ctx.beginPath();
-    ctx.arc(cx, cy, r * 0.72, a0, a1);
+    ctx.arc(cx, cy, r * 0.7, a0, a1);
     ctx.stroke();
-    const tipX = cx + Math.cos(a1) * r * 0.72;
-    const tipY = cy + Math.sin(a1) * r * 0.72;
+    const tipX = cx + Math.cos(a1) * r * 0.7;
+    const tipY = cy + Math.sin(a1) * r * 0.7;
     const dir = a1 + Math.PI / 2;
     ctx.beginPath();
     ctx.moveTo(tipX, tipY);
     ctx.lineTo(
-      tipX + Math.cos(dir - 0.5) * r * 0.32,
-      tipY + Math.sin(dir - 0.5) * r * 0.32,
+      tipX + Math.cos(dir - 0.5) * r * 0.3,
+      tipY + Math.sin(dir - 0.5) * r * 0.3,
     );
     ctx.lineTo(
-      tipX + Math.cos(dir + 0.5) * r * 0.32,
-      tipY + Math.sin(dir + 0.5) * r * 0.32,
+      tipX + Math.cos(dir + 0.5) * r * 0.3,
+      tipY + Math.sin(dir + 0.5) * r * 0.3,
     );
     ctx.closePath();
-    ctx.fillStyle = color;
     ctx.fill();
   }
   ctx.restore();
 }
 
-/** Pastilla redondeada centrada. */
-function pill(
+/** Lateral: continuacion vegetal, sin texto. */
+function drawSideArt(
   ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  w: number,
-  h: number,
-  fill: string,
-  stroke?: string,
-  lineWidth = 3,
+  region: "RIGHT" | "LEFT",
 ): void {
-  const r = h / 2;
-  const x = cx - w / 2;
+  const { x, y, w, h } = ATLAS_REGIONS[region];
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.textBaseline = "middle";
+
+  // Tallo vertical que recorre el lateral.
+  ctx.strokeStyle = PALETTE.sage;
+  ctx.lineWidth = Math.max(2, w * 0.035);
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(x + r, cy - h / 2);
-  ctx.arcTo(x + w, cy - h / 2, x + w, cy + h / 2, r);
-  ctx.arcTo(x + w, cy + h / 2, x, cy + h / 2, r);
-  ctx.arcTo(x, cy + h / 2, x, cy - h / 2, r);
-  ctx.arcTo(x, cy - h / 2, x + w, cy - h / 2, r);
-  ctx.closePath();
-  ctx.fillStyle = fill;
-  ctx.fill();
-  if (stroke) {
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = lineWidth;
+  ctx.moveTo(w * 0.5, h * 0.08);
+  ctx.bezierCurveTo(
+    w * 0.22,
+    h * 0.3,
+    w * 0.78,
+    h * 0.52,
+    w * 0.5,
+    h * 0.78,
+  );
+  ctx.stroke();
+
+  for (let i = 0; i < 7; i++) {
+    const t = (i + 1) / 8;
+    const ly = h * (0.12 + t * 0.66);
+    const lx = w * (0.5 + Math.sin(t * Math.PI * 2.1) * 0.24);
+    const size = w * (0.42 - 0.14 * t);
+    const dir = i % 2 === 0 ? -0.9 : Math.PI + 0.9;
+    drawLeaf(ctx, lx, ly, size, size * 0.52, dir, i % 3 === 0 ? PALETTE.green : PALETTE.sage, 0.85);
+  }
+
+  drawBloom(ctx, w * 0.5, h * 0.16, w * 0.3, PALETTE.sage, PALETTE.coral, 0.7);
+  drawBloom(ctx, w * 0.5, h * 0.87, w * 0.26, PALETTE.sage, PALETTE.coral, 0.6);
+
+  ctx.restore();
+}
+
+/** Esquina: sombreado suave del pliegue + continuation de motivos. */
+function drawCornerArt(
+  ctx: CanvasRenderingContext2D,
+  region: "CORNER_FR" | "CORNER_FL" | "CORNER_BR" | "CORNER_BL",
+): void {
+  const { x, y, w, h } = ATLAS_REGIONS[region];
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Pliegue: sombra suave en el centro del arco.
+  const gradient = ctx.createLinearGradient(0, 0, w, 0);
+  gradient.addColorStop(0, "rgba(74,64,44,0)");
+  gradient.addColorStop(0.5, "rgba(74,64,44,0.13)");
+  gradient.addColorStop(1, "rgba(74,64,44,0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, w, h);
+
+  // Hojas sueltas que enlazan las caras.
+  drawLeaf(ctx, w * 0.5, h * 0.16, w * 0.75, w * 0.34, -1.35, PALETTE.sage, 0.5);
+  drawLeaf(ctx, w * 0.5, h * 0.86, w * 0.7, w * 0.3, -1.75, PALETTE.sage, 0.45);
+
+  ctx.restore();
+}
+
+/** Cara superior: sellado en caliente con estrias. */
+function drawTopArt(ctx: CanvasRenderingContext2D): void {
+  const { x, y, w, h } = ATLAS_REGIONS.TOP;
+  ctx.save();
+  ctx.translate(x, y);
+
+  ctx.fillStyle = "#E2D9C2";
+  ctx.fillRect(0, 0, w, h);
+
+  // Estrias del sellado.
+  const step = Math.max(6, w / 150);
+  for (let px = 0; px < w; px += step) {
+    ctx.fillStyle = "rgba(255,252,244,0.5)";
+    ctx.fillRect(px, h * 0.1, step * 0.42, h * 0.8);
+    ctx.fillStyle = "rgba(112,99,74,0.12)";
+    ctx.fillRect(px + step * 0.5, h * 0.1, step * 0.34, h * 0.8);
+  }
+
+  // Sombras suaves en los bordes del sellado.
+  const top = ctx.createLinearGradient(0, 0, 0, h * 0.22);
+  top.addColorStop(0, "rgba(96,84,62,0.22)");
+  top.addColorStop(1, "rgba(96,84,62,0)");
+  ctx.fillStyle = top;
+  ctx.fillRect(0, 0, w, h * 0.22);
+
+  const bottom = ctx.createLinearGradient(0, h * 0.82, 0, h);
+  bottom.addColorStop(0, "rgba(96,84,62,0)");
+  bottom.addColorStop(1, "rgba(96,84,62,0.18)");
+  ctx.fillStyle = bottom;
+  ctx.fillRect(0, h * 0.82, w, h * 0.18);
+
+  ctx.restore();
+}
+
+/** Base inferior: pliegues de fuelle que permiten que la bolsa se sostenga. */
+function drawBottomArt(ctx: CanvasRenderingContext2D): void {
+  const { x, y, w, h } = ATLAS_REGIONS.BOTTOM;
+  ctx.save();
+  ctx.translate(x, y);
+
+  ctx.fillStyle = "#E1D8C1";
+  ctx.fillRect(0, 0, w, h);
+
+  // Pliegues triangulares del fuelle.
+  ctx.strokeStyle = "rgba(104,92,68,0.22)";
+  ctx.lineWidth = Math.max(2, h * 0.02);
+  for (let i = 0; i <= 6; i++) {
+    const px = (i / 6) * w;
+    ctx.beginPath();
+    ctx.moveTo(px, 0);
+    ctx.lineTo(px + (i % 2 === 0 ? 1 : -1) * w * 0.05, h);
     ctx.stroke();
   }
+
+  const shade = ctx.createRadialGradient(
+    w * 0.5,
+    h * 0.55,
+    h * 0.1,
+    w * 0.5,
+    h * 0.55,
+    w * 0.42,
+  );
+  shade.addColorStop(0, "rgba(96,84,62,0)");
+  shade.addColorStop(1, "rgba(96,84,62,0.26)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.restore();
 }
+
+/* ------------------------------------------------------------------ */
+/* API publica                                                         */
+/* ------------------------------------------------------------------ */
 
 export type AtlasOptions = {
   /** peso neto que se imprime en la cara frontal */
   weightLabel: string;
-  /** codigo interno que se imprime en la banda inferior */
+  /** codigo interno que se imprime en la cara frontal */
   productCode: string;
 };
 
@@ -368,288 +766,161 @@ export const DEFAULT_ATLAS_OPTIONS: AtlasOptions = {
   productCode: "REN-DET-005",
 };
 
-/* ------------------------------------------------------------------ */
-/* Layout del panorama                                                 */
-/* ------------------------------------------------------------------ */
-
-const R = ATLAS_REGIONS;
-
-/* ------------------------------------------------------------------ */
-/* Pintado                                                             */
-/* ------------------------------------------------------------------ */
-
-function paintFrontArt(
-  ctx: CanvasRenderingContext2D,
-  options: AtlasOptions,
-): void {
-  const { x, y, w, h } = R.FRONT;
-  ctx.save();
-  ctx.translate(x, y);
-
-  // Logotipo RENOVA
-  ctx.fillStyle = PALETTE.forest;
-  setFont(ctx, h * 0.082, 800, FONT_DISPLAY);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  trackedText(ctx, "RENOVA", x + w / 2, y + h * 0.335, h * 0.012);
-
-  // Arco bajo el logotipo
-  ctx.beginPath();
-  ctx.arc(x + w / 2, y + h * 0.335, w * 0.31, Math.PI * 0.2, Math.PI * 0.8);
-  ctx.strokeStyle = PALETTE.coral;
-  ctx.lineWidth = Math.max(3, h * 0.0042);
-  ctx.stroke();
-
-  // Eslogan
-  ctx.fillStyle = PALETTE.leaf;
-  setFont(ctx, h * 0.028, 500, FONT_SANS, true);
-  trackedText(ctx, "Limpieza que da más vida", x + w / 2, y + h * 0.412, h * 0.0024);
-
-  // Separador con hojas
-  ctx.strokeStyle = PALETTE.sage;
-  ctx.lineWidth = Math.max(2, h * 0.0024);
-  ctx.beginPath();
-  ctx.moveTo(x + w * 0.22, y + h * 0.463);
-  ctx.lineTo(x + w * 0.78, y + h * 0.463);
-  ctx.stroke();
-  leaf(ctx, x + w * 0.5 - w * 0.05, y + h * 0.463, w * 0.08, -0.5, PALETTE.sage);
-  leaf(ctx, x + w * 0.5 + w * 0.05, y + h * 0.463, w * 0.08, Math.PI + 0.5, PALETTE.sage);
-
-  // Informacion del producto
-  ctx.fillStyle = PALETTE.forest;
-  setFont(ctx, h * 0.025, 700, FONT_DISPLAY);
-  trackedText(ctx, "DETERGENTE EN POLVO", x + w / 2, y + h * 0.518, h * 0.0044);
-
-  ctx.fillStyle = PALETTE.leaf;
-  setFont(ctx, h * 0.0195, 600, FONT_SANS);
-  trackedText(ctx, "FRAGANCIA FLORAL", x + w / 2, y + h * 0.568, h * 0.0062);
-
-  ctx.fillStyle = PALETTE.coral;
-  const dot = h * 0.0052;
-  ctx.beginPath();
-  ctx.arc(x + w * 0.145, y + h * 0.568, dot, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(x + w * 0.855, y + h * 0.568, dot, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Badge de peso neto
-  const badgeH = h * 0.05;
-  const badgeY = y + h * 0.632;
-  pill(ctx, x + w / 2, badgeY, w * 0.3, badgeH, PALETTE.ivory, PALETTE.forest, Math.max(3, h * 0.0034));
-  ctx.fillStyle = PALETTE.forest;
-  setFont(ctx, h * 0.029, 800, FONT_DISPLAY);
-  trackedText(ctx, options.weightLabel, x + w / 2, badgeY, h * 0.003);
-
-  // Ilustracion vegetal inferior
-  branch(ctx, x + w * 0.14, y + h * 0.8, w * 0.46, -0.22, PALETTE.sage, 5, 0.9);
-  branch(ctx, x + w * 0.9, y + h * 0.76, w * 0.38, Math.PI + 0.26, PALETTE.sage, 4, 0.9);
-  leaf(ctx, x + w * 0.3, y + h * 0.72, w * 0.16, -1.1, PALETTE.leaf, 0.75);
-  leaf(ctx, x + w * 0.72, y + h * 0.7, w * 0.14, -2.1, PALETTE.leaf, 0.7);
-
-  ctx.restore();
-}
-
-function paintBackArt(
-  ctx: CanvasRenderingContext2D,
-  options: AtlasOptions,
-): void {
-  const { x, y, w, h } = R.BACK;
-  ctx.save();
-  ctx.translate(x, y);
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  // Marca discreta
-  ctx.fillStyle = PALETTE.forest;
-  setFont(ctx, h * 0.038, 800, FONT_DISPLAY);
-  trackedText(ctx, "RENOVA", x + w / 2, y + h * 0.155, h * 0.007);
-  ctx.fillStyle = PALETTE.leaf;
-  setFont(ctx, h * 0.021, 500, FONT_SANS, true);
-  trackedText(ctx, "Limpieza que da más vida", x + w / 2, y + h * 0.195, h * 0.002);
-
-  const heading = (text: string, at: number) => {
-    ctx.fillStyle = PALETTE.forest;
-    setFont(ctx, h * 0.018, 700, FONT_SANS);
-    trackedText(ctx, text, x + w / 2, y + h * at, h * 0.0034);
-  };
-  const lines = (rows: string[], from: number) => {
-    ctx.fillStyle = PALETTE.ink;
-    setFont(ctx, h * 0.0148, 400, FONT_SANS);
-    rows.forEach((line, i) => {
-      ctx.fillText(line, x + w / 2, y + h * (from + i * 0.028));
-    });
-  };
-
-  heading("INSTRUCCIONES DE USO", 0.275);
-  lines(
-    [
-      "Lavado a mano: disuelva la dosis en agua,",
-      "lave segun el cuidado de la prenda y",
-      "enjuague bien.",
-      "Lavadora: agregue la dosis en el compartimiento",
-      "recomendado por el fabricante.",
-    ],
-    0.325,
-  );
-
-  heading("CARACTERISTICAS", 0.505);
-  lines(
-    [
-      "Detergente en polvo de uso domestico.",
-      "Fragancia floral.",
-      "Envase de 5 kg.",
-    ],
-    0.552,
-  );
-
-  heading("PRECAUCIONES", 0.665);
-  lines(
-    [
-      "No usar para higiene personal ni para lavar",
-      "alimentos. No mezclar con otros limpiadores.",
-      "Mantener fuera del alcance de los ninos.",
-    ],
-    0.712,
-  );
-
-  recycleMark(ctx, x + w * 0.5, y + h * 0.815, h * 0.055, PALETTE.leaf);
-  ctx.fillStyle = PALETTE.forest;
-  setFont(ctx, h * 0.0165, 700, FONT_SANS);
-  trackedText(
-    ctx,
-    `CONTENIDO NETO ${options.weightLabel.toUpperCase()}`,
-    x + w / 2,
-    y + h * 0.862,
-    h * 0.0024,
-  );
-
-  ctx.restore();
-}
-
-function paintSideArt(
-  ctx: CanvasRenderingContext2D,
-  rect: PixelRect,
-  flip: boolean,
-): void {
-  const { x, y, w, h } = rect;
-  ctx.save();
-  ctx.translate(x, y);
-  if (flip) {
-    ctx.translate(w, 0);
-    ctx.scale(-1, 1);
-  }
-
-  // Ondas verticales suaves en la zona media
-  waveStroke(ctx, 0, 0, w, h * 0.46, h * 0.035, 1.1, 0.4, PALETTE.sage, Math.max(2, w * 0.05));
-  waveStroke(ctx, 0, 0, w, h * 0.53, h * 0.028, 1.4, 2.2, PALETTE.leaf, Math.max(2, w * 0.035));
-
-  leaf(ctx, w * 0.5, h * 0.4, w * 0.75, -1.0, PALETTE.sage, 0.75);
-  leaf(ctx, w * 0.55, h * 0.44, w * 0.6, -2.2, PALETTE.sage, 0.6);
-
-  ctx.fillStyle = PALETTE.coral;
-  ctx.beginPath();
-  ctx.arc(w * 0.5, h * 0.5, w * 0.1, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function paintCornerArt(
-  ctx: CanvasRenderingContext2D,
-  rect: PixelRect,
-  flip: boolean,
-): void {
-  const { x, y, w, h } = rect;
-  ctx.save();
-  ctx.translate(x, y);
-  if (flip) {
-    ctx.translate(w, 0);
-    ctx.scale(-1, 1);
-  }
-  waveStroke(ctx, 0, 0, w, h * 0.45, h * 0.03, 0.9, 0.8, PALETTE.sage, Math.max(2, w * 0.03));
-  waveStroke(ctx, 0, 0, w, h * 0.52, h * 0.024, 1.2, 2.6, PALETTE.leaf, Math.max(2, w * 0.022));
-  ctx.restore();
-}
-
-function paintTopArt(ctx: CanvasRenderingContext2D): void {
-  const { x, y, w, h } = R.TOP;
-  fillRect(ctx, R.TOP, PALETTE.ivory);
-  ctx.fillStyle = PALETTE.forest;
-  ctx.fillRect(x, y, w, h * 0.46);
-  ctx.fillStyle = PALETTE.sage;
-  ctx.fillRect(x, y + h * 0.46, w, h * 0.2);
-  ctx.fillStyle = PALETTE.coral;
-  ctx.fillRect(x, y + h * 0.66, w, h * 0.08);
-  ctx.strokeStyle = PALETTE.ivory;
-  ctx.lineWidth = Math.max(2, h * 0.03);
-  for (let i = 0; i < 30; i++) {
-    const px = x + (i / 29) * w;
-    ctx.beginPath();
-    ctx.moveTo(px, y + h * 0.76);
-    ctx.lineTo(px + w * 0.012, y + h);
-    ctx.stroke();
-  }
-}
-
-function paintBottomArt(ctx: CanvasRenderingContext2D): void {
-  const { x, y, w, h } = R.BOTTOM;
-  fillRect(ctx, R.BOTTOM, PALETTE.ivory);
-  waveBand(ctx, x, y, w, h, y + h * 0.3, h * 0.14, 2.2, 0.4, PALETTE.sage);
-  waveBand(ctx, x, y, w, h, y + h * 0.55, h * 0.11, 2.8, 2.6, PALETTE.leaf);
-  ctx.fillStyle = PALETTE.forest;
-  ctx.fillRect(x, y + h * 0.84, w, h * 0.16);
-}
-
-/** Pinta el atlas completo de la bolsa RENOVA. */
+/**
+ * Pinta el atlas completo de la bolsa RENOVA:
+ *  1. material base (papel kraft blanqueado con fibras y grano)
+ *  2. diseno impreso (composicion frontal, trasera y motivos vegetales)
+ *  3. integracion (variacion suave de densidad de tinta)
+ */
 export function paintRenovaAtlas(
   ctx: CanvasRenderingContext2D,
   options: AtlasOptions = DEFAULT_ATLAS_OPTIONS,
 ): void {
   ctx.clearRect(0, 0, ATLAS_WIDTH, ATLAS_HEIGHT);
-  ctx.fillStyle = PALETTE.ivory;
+  ctx.textBaseline = "alphabetic";
+  ctx.textAlign = "left";
+
+  const tile = createNoiseTile(128);
+
+  // ---- Capa 1: material base ---------------------------------------
+  ctx.fillStyle = PALETTE.paper;
   ctx.fillRect(0, 0, ATLAS_WIDTH, ATLAS_HEIGHT);
+  paintTonalVariation(ctx, 0, 0, STRIP_W, BODY_H, 16);
+  paintTonalVariation(ctx, 0, BODY_H, ATLAS_WIDTH, ATLAS_HEIGHT - BODY_H, 4);
+  paintFibers(ctx, 0, 0, STRIP_W, BODY_H, 17000);
+  paintFibers(ctx, 0, BODY_H, ATLAS_WIDTH, ATLAS_HEIGHT - BODY_H, 1200);
+  paintGrain(ctx, tile, 0.05);
 
-  // ---- Panorama continuo: bandas de onda que cruzan todo el perimetro ----
-  const H = PANORAMA_H;
+  // ---- Capa 2: diseno impreso --------------------------------------
+  // El cuerpo se pinta como panorama continuo sobre la franja superior.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, STRIP_W, BODY_H);
+  ctx.clip();
 
-  // Banda superior (sellado) verde oscuro
-  ctx.fillStyle = PALETTE.forest;
-  ctx.fillRect(0, 0, PANORAMA_W, H * 0.07);
-  ctx.fillStyle = PALETTE.coral;
-  ctx.fillRect(0, H * 0.07, PANORAMA_W, Math.max(3, H * 0.0035));
+  // Motivos de la cara frontal. Se pintan dos veces: la segunda copia
+  // continua el motivo en la esquina final del perimetro (cierre del anillo).
+  for (const dx of [0, STRIP_W]) {
+    ctx.save();
+    ctx.translate(ATLAS_REGIONS.FRONT.x + dx, ATLAS_REGIONS.FRONT.y);
+    drawFrontBotanicals(ctx);
+    ctx.restore();
+  }
 
-  // Ondas superiores
-  waveBand(ctx, 0, H * 0.07, PANORAMA_W, H * 0.09, H * 0.12, H * 0.022, 3.1, 0.4, PALETTE.sage);
-  waveBand(ctx, 0, H * 0.07, PANORAMA_W, H * 0.09, H * 0.145, H * 0.018, 3.8, 2.2, PALETTE.leaf);
-  waveBand(ctx, 0, H * 0.07, PANORAMA_W, H * 0.09, H * 0.168, H * 0.013, 4.6, 4.1, PALETTE.forest);
+  ctx.save();
+  ctx.translate(ATLAS_REGIONS.BACK.x, ATLAS_REGIONS.BACK.y);
+  drawBackComposition(ctx, options);
+  ctx.restore();
 
-  // Ondas inferiores
-  waveBand(ctx, 0, H * 0.88, PANORAMA_W, H * 0.12, H * 0.9, H * 0.016, 3.4, 1.1, PALETTE.sage);
-  waveBand(ctx, 0, H * 0.88, PANORAMA_W, H * 0.12, H * 0.925, H * 0.013, 4.1, 3.3, PALETTE.leaf);
-  ctx.fillStyle = PALETTE.forest;
-  ctx.fillRect(0, H * 0.955, PANORAMA_W, H * 0.045);
+  ctx.save();
+  ctx.translate(ATLAS_REGIONS.FRONT.x, ATLAS_REGIONS.FRONT.y);
+  drawFrontComposition(ctx, options);
+  ctx.restore();
 
-  ctx.fillStyle = PALETTE.ivory;
-  setFont(ctx, H * 0.0115, 600, FONT_SANS);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  trackedText(ctx, options.productCode, R.FRONT.x + R.FRONT.w / 2, H * 0.978, H * 0.0022);
-  trackedText(ctx, options.productCode, R.BACK.x + R.BACK.w / 2, H * 0.978, H * 0.0022);
+  drawSideArt(ctx, "RIGHT");
+  drawSideArt(ctx, "LEFT");
+  drawCornerArt(ctx, "CORNER_FR");
+  drawCornerArt(ctx, "CORNER_FL");
+  drawCornerArt(ctx, "CORNER_BR");
+  drawCornerArt(ctx, "CORNER_BL");
 
-  // ---- Contenido por region ----
-  paintSideArt(ctx, R.RIGHT, false);
-  paintSideArt(ctx, R.LEFT, true);
-  paintCornerArt(ctx, R.CORNER_FR, false);
-  paintCornerArt(ctx, R.CORNER_FL, true);
-  paintCornerArt(ctx, R.CORNER_BR, false);
-  paintCornerArt(ctx, R.CORNER_BL, true);
+  ctx.restore();
 
-  paintFrontArt(ctx, options);
-  paintBackArt(ctx, options);
+  // Tapas.
+  drawTopArt(ctx);
+  drawBottomArt(ctx);
 
-  // ---- Tapas ----
-  paintTopArt(ctx);
-  paintBottomArt(ctx);
+  // ---- Capa 3: integracion con el material -------------------------
+  // Variacion de densidad de tinta: multiplos suaves, sin manchas.
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  ctx.globalAlpha = 0.05;
+  paintTonalVariation(ctx, 0, 0, ATLAS_WIDTH, ATLAS_HEIGHT, 10);
+  ctx.restore();
+
+  // Grano final: unifica impresion y soporte.
+  paintGrain(ctx, tile, 0.035);
+}
+
+/**
+ * Canvas de microfibras para bumpMap / roughnessMap.
+ * Es un tile en escala de grises, no el color del empaque.
+ */
+export function createFiberNoiseCanvas(size = 512): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+
+  const image = ctx.createImageData(size, size);
+  const data = image.data;
+  const local = makeRng(0x51ed_270b);
+  for (let i = 0; i < size * size; i++) {
+    const value = 128 + (local() - 0.5) * 18;
+    data[i * 4] = value;
+    data[i * 4 + 1] = value;
+    data[i * 4 + 2] = value;
+    data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+
+  // Fibras finas (mapa de relieve).
+  ctx.lineCap = "round";
+  for (let pass = 0; pass < 2; pass++) {
+    ctx.strokeStyle = pass === 0 ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.26)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 2600; i++) {
+      const px = local() * size;
+      const py = local() * size;
+      const len = 3 + local() * 14;
+      const angle = local() < 0.6 ? (local() - 0.5) * 0.8 : Math.PI / 2 + (local() - 0.5) * 0.9;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
+      ctx.stroke();
+    }
+  }
+  return canvas;
+}
+
+/**
+ * Tile para roughnessMap: valores altos y cercanos (acabado mate) con una
+ * variacion leve, de modo que el brillo no sea uniforme en toda la superficie.
+ */
+export function createRoughnessNoiseCanvas(size = 512): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+
+  const image = ctx.createImageData(size, size);
+  const data = image.data;
+  const local = makeRng(0x2545_f491);
+  for (let i = 0; i < size * size; i++) {
+    const value = 236 + (local() - 0.5) * 22;
+    data[i * 4] = value;
+    data[i * 4 + 1] = value;
+    data[i * 4 + 2] = value;
+    data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+
+  ctx.lineCap = "round";
+  for (let pass = 0; pass < 2; pass++) {
+    ctx.strokeStyle = pass === 0 ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.16)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 1800; i++) {
+      const px = local() * size;
+      const py = local() * size;
+      const len = 4 + local() * 18;
+      const angle = local() < 0.6 ? (local() - 0.5) * 0.8 : Math.PI / 2 + (local() - 0.5) * 0.9;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
+      ctx.stroke();
+    }
+  }
+  return canvas;
 }

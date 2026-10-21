@@ -5,6 +5,12 @@ import {
   type RegionId,
   uvRectFromPixels,
 } from "./renova-atlas";
+import {
+  DEFAULT_DIMENSIONS,
+  profileAt,
+  smoothstep,
+  type BagDimensions,
+} from "./renova-bag-metrics";
 
 /**
  * Geometria de la bolsa RENOVA.
@@ -16,79 +22,12 @@ import {
  * pertenece, de modo que ninguna cara comparte textura con otra.
  */
 
-export type BagDimensions = {
-  /** altura total de la bolsa */
-  height: number;
-  /** semiancho del cuerpo */
-  halfWidth: number;
-  /** semiprofundidad del cuerpo */
-  halfDepth: number;
-  /** radio de las esquinas redondeadas */
-  cornerRadius: number;
-};
-
-export const DEFAULT_DIMENSIONS: BagDimensions = {
-  height: 1.58,
-  halfWidth: 0.52,
-  halfDepth: 0.19,
-  cornerRadius: 0.09,
-};
+export { DEFAULT_DIMENSIONS, profileAt } from "./renova-bag-metrics";
+export type { BagDimensions, SectionProfile } from "./renova-bag-metrics";
 
 /** Amplitud del abombado de las caras frontales. */
-const FRONT_BULGE = 0.022;
-const SIDE_BULGE = 0.018;
-
-type ProfileKey = { t: number; w: number; d: number; r: number };
-
-/**
- * Perfil vertical normalizado (t = y / height).
- *  - la base es un poco mas ancha y profunda
- *  - el cuerpo se mantiene estable
- *  - la zona superior se aplana para el sellado
- */
-const PROFILE_KEYS: ProfileKey[] = [
-  { t: 0.0, w: 1.14, d: 1.32, r: 0.92 },
-  { t: 0.12, w: 1.08, d: 1.18, r: 0.96 },
-  { t: 0.32, w: 1.02, d: 1.08, r: 1.0 },
-  { t: 0.58, w: 0.998, d: 1.02, r: 0.98 },
-  { t: 0.82, w: 0.98, d: 0.95, r: 0.9 },
-  { t: 0.94, w: 0.95, d: 0.84, r: 0.82 },
-  { t: 1.0, w: 0.94, d: 0.78, r: 0.78 },
-];
-
-function smoothstep(edge0: number, edge1: number, x: number): number {
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
-
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-export type SectionProfile = {
-  halfWidth: number;
-  halfDepth: number;
-  cornerRadius: number;
-};
-
-/** Perfil de la bolsa a una altura dada. */
-export function profileAt(
-  y: number,
-  dims: BagDimensions = DEFAULT_DIMENSIONS,
-): SectionProfile {
-  const t = Math.min(1, Math.max(0, y / dims.height));
-  let i = 0;
-  while (i < PROFILE_KEYS.length - 2 && t > PROFILE_KEYS[i + 1].t) i++;
-  const k0 = PROFILE_KEYS[i];
-  const k1 = PROFILE_KEYS[i + 1];
-  const raw = (t - k0.t) / (k1.t - k0.t);
-  const f = raw * raw * (3 - 2 * raw);
-  return {
-    halfWidth: dims.halfWidth * lerp(k0.w, k1.w, f),
-    halfDepth: dims.halfDepth * lerp(k0.d, k1.d, f),
-    cornerRadius: dims.cornerRadius * lerp(k0.r, k1.r, f),
-  };
-}
+const FRONT_BULGE = 0.026;
+const SIDE_BULGE = 0.02;
 
 /** Perfil vertical del abombado: nulo en la base y en el sellado. */
 function bulgeProfile(t: number): number {
@@ -301,7 +240,11 @@ function faceBulge(region: RegionId | undefined, s: number, amount: number): num
   return amount * Math.sin(Math.PI * s);
 }
 
-/** Desplazamiento total (abombado + pliegues) de un vertice. */
+/**
+ * Desplazamiento total (abombado + pliegues) de un vertice.
+ * Todos los términos son suaves y de baja amplitud: la bolsa debe verse llena
+ * y flexible, no arrugada ni derretida.
+ */
 function displacement(
   point: SectionPoint | undefined,
   y: number,
@@ -310,41 +253,69 @@ function displacement(
   if (!point || !point.region) return 0;
   const t = y / dims.height;
   const body = bulgeProfile(t);
+  const isFlat = point.region === "FRONT" || point.region === "BACK";
+  const isCorner = point.region.startsWith("CORNER");
 
-  const amount =
-    point.region === "FRONT" || point.region === "BACK" ? FRONT_BULGE : SIDE_BULGE;
+  // Abombado por el contenido.
+  const amount = isFlat ? FRONT_BULGE : SIDE_BULGE;
   const bulge = faceBulge(point.region, point.s, amount) * body;
 
-  // Pliegues arrugados tipo saco de cemento
-  const foldWeight =
-    point.region === "FRONT" || point.region === "BACK" ? 0.34 : 0.9;
+  // Arrugas finas de la bolsa flexible llena de polvo.
+  const foldWeight = isFlat ? 0.34 : 0.9;
   const foldEnvelope = Math.exp(-Math.pow((y - 0.14) / 0.16, 2));
   const fold =
     Math.sin(point.perimeter * Math.PI * 2 * 9 + y * 6.2) *
-    0.012 *
-    foldEnvelope *
-    foldWeight *
-    body +
+      0.012 *
+      foldEnvelope *
+      foldWeight *
+      body +
     Math.sin(point.perimeter * Math.PI * 2 * 5 + y * 3.4) * 0.006 * foldEnvelope * body;
 
-  // Pliegues verticales en esquinas
-  const crease = point.region.startsWith("CORNER")
+  // Pliegues verticales en las esquinas (tension del material).
+  const crease = isCorner
     ? -0.01 * Math.exp(-Math.pow((y - 0.16) / 0.18, 2)) * body
     : 0;
 
-  // Pliegues del cierre inferior/superior tipo saco (costura plegada)
-  const gusset = Math.sin((t > 0.92 ? (1 - t) * 12 : t * 8)) * 0.008 * (1 - Math.min(1, t * 0.6));
-  const gussetTop = smoothstep(0.86, 0.94, t) * (1 - smoothstep(0.99, 1.0, t))
-    ? Math.sin(point.perimeter * Math.PI * 2 * 11 + t * 40) * 0.005
+  // Fuelle inferior: la base se recoge hacia dentro para que el envase
+  // se sostenga de pie.
+  const baseEnvelope = smoothstep(0.17, 0.0, t);
+  const gusset = isCorner
+    ? -0.018 *
+      baseEnvelope *
+      (0.62 + 0.38 * Math.cos(point.perimeter * Math.PI * 2 * 4 + 0.8))
     : 0;
+  const baseRidges =
+    Math.sin(t * Math.PI * 2 * 3.4 + 0.6) * 0.005 * baseEnvelope * body;
 
-  // Arrugas en el cuello
+  // Sellado superior: leve irregularidad del borde caliente.
   const crimp =
     smoothstep(0.88, 0.93, t) * (1 - smoothstep(0.985, 1.0, t))
-      ? (Math.sin((t - 0.88) * Math.PI * 2 * 16) + Math.sin((t - 0.9) * Math.PI * 2 * 9)) * 0.004
+      ? (Math.sin((t - 0.88) * Math.PI * 2 * 9) +
+          Math.sin((t - 0.9) * Math.PI * 2 * 5)) *
+        0.005
       : 0;
 
-  return bulge + fold + crease + gusset + gussetTop + crimp;
+  // Irregularidad de la silueta: nunca una geometria perfectamente regular.
+  const wobble =
+    (Math.sin(point.perimeter * Math.PI * 2 * 2.3 + 1.7) * 0.004 +
+      Math.sin(point.perimeter * Math.PI * 2 * 3.7 + y * 1.3 + 0.6) * 0.0025) *
+    body *
+    foldWeight;
+
+  // Relajacion del material en la zona baja (el apoyo aplasta la bolsa).
+  const sag =
+    -0.006 * smoothstep(0.36, 0.1, t) * body * (isFlat ? 1 : 0.45);
+
+  return (
+    bulge +
+    fold +
+    crease +
+    gusset +
+    baseRidges +
+    crimp +
+    wobble +
+    sag
+  );
 }
 
 /** Distribucion vertical de las filas: mas densidad en base y sellado. */
@@ -353,9 +324,9 @@ function buildRows(dims: BagDimensions): number[] {
   const push = (from: number, to: number, count: number) => {
     for (let i = 0; i < count; i++) rows.push(from + ((to - from) * i) / count);
   };
-  push(0, 0.32, 28);
-  push(0.32, 1.44, 42);
-  push(1.44, dims.height, 28);
+  push(0, 0.32, 30);
+  push(0.32, 1.36, 44);
+  push(1.36, dims.height, 46);
   rows.push(dims.height);
   return rows;
 }
@@ -392,7 +363,7 @@ export function createBagGeometry(
     for (let c = 0; c < colCount; c++) {
       const point = section[c];
       if (!point || typeof point.region !== "string") {
-        // Copiar el punto válido anterior si existe
+        // Copiar el punto valido anterior si existe
         const prev = section[c - 1] ?? section[section.length - 1];
         if (!prev?.region) continue;
         const vi = r * colCount + c;
