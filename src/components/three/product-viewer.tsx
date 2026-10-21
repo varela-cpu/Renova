@@ -20,6 +20,7 @@ function ProductModel({
   productCode: string;
 }) {
   const gl = useThree((state) => state.gl);
+  const groupRef = useMemo(() => new THREE.Group(), []);
 
   const model = useMemo(
     () =>
@@ -31,10 +32,25 @@ function ProductModel({
   );
 
   useEffect(() => {
-    return () => model.dispose();
-  }, [model]);
+    groupRef.add(model.group);
+    groupRef.rotation.y = -0.4;
+    return () => {
+      groupRef.clear();
+      model.dispose();
+    };
+  }, [groupRef, model]);
 
-  return <primitive object={model.group} />;
+  useEffect(() => {
+    let frame = 0;
+    const animate = () => {
+      frame = requestAnimationFrame(animate);
+      groupRef.rotation.y += 0.004;
+    };
+    animate();
+    return () => cancelAnimationFrame(frame);
+  }, [groupRef]);
+
+  return <primitive object={groupRef} />;
 }
 
 export type ProductViewerProps = {
@@ -51,62 +67,58 @@ export function ProductViewer({
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
-      camera={{ position: [1.7, 1.15, 2.95], fov: 32, near: 0.1, far: 60 }}
+      dpr={[1, 1.5]}
+      camera={{ position: [2.1, 1.2, 2.6], fov: 28, near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.08;
+        gl.toneMappingExposure = 1.0;
       }}
       style={{ width: "100%", height: "100%", touchAction: "none" }}
       className={className}
     >
-      <ambientLight intensity={0.35} />
-      <hemisphereLight args={["#ffffff", "#cbdcbf", 0.6]} />
+      <ambientLight intensity={0.4} />
+      <hemisphereLight args={["#ffffff", "#d7e3d0", 0.5]} />
 
       <directionalLight
-        position={[2.6, 3.6, 3.2]}
-        intensity={1.35}
-        color="#fff6e8"
+        position={[3, 4, 3]}
+        intensity={1.2}
+        color="#fff7ec"
         castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-2.2}
-        shadow-camera-right={2.2}
-        shadow-camera-top={2.2}
-        shadow-camera-bottom={-2.2}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-left={-1.6}
+        shadow-camera-right={1.6}
+        shadow-camera-top={1.6}
+        shadow-camera-bottom={-1.6}
         shadow-camera-near={0.5}
-        shadow-camera-far={12}
-        shadow-bias={-0.0006}
+        shadow-camera-far={10}
+        shadow-bias={-0.0005}
       />
       <directionalLight
-        position={[-3.2, 1.8, 2.4]}
-        intensity={0.38}
-        color="#dcf0e2"
+        position={[-2.8, 2, 2]}
+        intensity={0.32}
+        color="#e8f5ec"
       />
       <directionalLight
-        position={[-1.4, 2.6, -3.2]}
-        intensity={0.5}
+        position={[0, 2.6, -3]}
+        intensity={0.28}
         color="#ffffff"
       />
 
       {/* Suelo: solo recibe la sombra, para no tapar el fondo de la pagina */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <circleGeometry args={[7, 64]} />
-        <shadowMaterial opacity={0.16} color="#204c3b" />
+        <circleGeometry args={[6, 48]} />
+        <shadowMaterial opacity={0.12} color="#1a3f2f" />
       </mesh>
 
       <ProductModel weightLabel={weightLabel} productCode={productCode} />
 
       <OrbitControls
         enablePan={false}
-        enableDamping
-        dampingFactor={0.08}
-        rotateSpeed={0.75}
-        minDistance={1.8}
-        maxDistance={5.5}
-        minPolarAngle={0.3}
-        maxPolarAngle={Math.PI / 2.05}
-        target={[0, 0.86, 0]}
+        enableZoom={false}
+        enableRotate={false}
+        enableDamping={false}
+        target={[0, 0.9, 0]}
       />
     </Canvas>
   );

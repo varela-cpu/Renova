@@ -15,19 +15,18 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="min-h-screen antialiased">
-        <div className="mx-auto flex min-h-screen w-full max-w-[1400px] flex-col px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="flex min-h-screen w-full flex-col">
           <SiteNav />
-          <main className="flex-1 pt-6">
-            <RenovaProvider>{children}</RenovaProvider>
-          </main>
-          <footer className="mt-14 border-t border-sage/40 pt-6 text-xs text-forest/60">
-            <p>
-              RENOVA · Simulador financiero interno. Datos de producto basados en la
-              ficha técnica preliminar (composición de referencia) — cifras
-              pendientes de validación con el maquilador y los proveedores de
-              empaque.
-            </p>
-          </footer>
+          <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-4 pb-16 sm:px-6 lg:px-8">
+            <main className="flex-1 pt-6">
+              <RenovaProvider>{children}</RenovaProvider>
+            </main>
+            <footer className="mt-14 border-t border-sage/40 pt-6 text-xs text-forest/60">
+              <p>
+                RENOVA · Simulador financiero interno
+              </p>
+            </footer>
+          </div>
         </div>
       </body>
     </html>

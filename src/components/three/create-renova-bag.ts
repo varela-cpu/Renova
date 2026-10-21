@@ -60,10 +60,10 @@ export function createRenovaBagTexture(
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
-  texture.generateMipmaps = true;
-  texture.anisotropy = Math.min(16, maxAnisotropy);
+  texture.generateMipmaps = false;
+  texture.anisotropy = Math.min(4, maxAnisotropy);
   texture.needsUpdate = true;
   return texture;
 }
@@ -72,13 +72,13 @@ export function createRenovaBagTexture(
 export function createBagMaterial(texture: THREE.Texture): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
     map: texture,
-    roughness: 0.44,
+    roughness: 0.62,
     metalness: 0,
-    clearcoat: 0.28,
-    clearcoatRoughness: 0.55,
-    sheen: 0.25,
-    sheenColor: new THREE.Color("#dcecdd"),
-    envMapIntensity: 0.8,
+    clearcoat: 0.12,
+    clearcoatRoughness: 0.72,
+    sheen: 0.18,
+    sheenColor: new THREE.Color("#e6efe7"),
+    envMapIntensity: 0.6,
   });
 }
 

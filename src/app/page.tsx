@@ -123,13 +123,13 @@ export default function DashboardPage() {
 
       <section className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
         <Card eyebrow="Producto" title="Modelo 3D RENOVA">
-          <div className="relative h-[460px] overflow-hidden rounded-[1rem] border border-sage/40 bg-gradient-to-br from-mist via-cream to-ivory">
+          <div className="relative h-[440px] overflow-hidden rounded-[1rem] border border-sage/40 bg-gradient-to-br from-mist via-cream to-ivory">
             <ProductViewer
               weightLabel={activeProduct.weightKg === 5 ? "5 kg" : `${activeProduct.weightKg} kg`}
               productCode={activeProduct.code}
             />
-            <div className="pointer-events-none absolute bottom-4 left-4 flex flex-col gap-1 rounded-full bg-forest/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-cream">
-              <span>UV mapping continuo · Tapa independiente</span>
+            <div className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-forest/80 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-cream">
+              <span>Vista giratoria</span>
             </div>
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-2">

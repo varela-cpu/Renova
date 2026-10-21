@@ -101,3 +101,39 @@ See more: https://nextjs.org/docs/app/guides/local-development
 ✓ Compiled in 37ms
 [browser] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
 [browser] THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.
+ GET / 200 in 52ms (next.js: 3ms, application-code: 49ms)
+ GET /matriz/insumos 200 in 42ms (next.js: 12ms, application-code: 31ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /matriz/nomina 200 in 37ms (next.js: 11ms, application-code: 27ms)
+ GET /recursos 200 in 40ms (next.js: 11ms, application-code: 29ms)
+ GET /parametros 200 in 38ms (next.js: 10ms, application-code: 29ms)
+ GET /recursos 200 in 33ms (next.js: 2ms, application-code: 31ms)
+ GET /matriz/nomina 200 in 26ms (next.js: 2ms, application-code: 24ms)
+ GET / 200 in 29ms (next.js: 2ms, application-code: 26ms)
+[browser] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+[browser] THREE.WebGLShadowMap: PCFSoftShadowMap has been removed. Using PCFShadowMap instead.
+✓ Compiled in 95ms
+✓ Compiled in 42ms
+✓ Compiled in 36ms
+✓ Compiled in 52ms
+✓ Compiled in 43ms
+✓ Compiled in 37ms
+✓ Compiled in 31ms
+✓ Compiled in 36ms
+✓ Compiled in 39ms
+✓ Compiled in 48ms
+✓ Compiled in 37ms
+✓ Compiled in 32ms
+✓ Compiled in 38ms
+✓ Compiled in 59ms
+✓ Compiled in 33ms
+ GET / 200 in 29ms (next.js: 4ms, application-code: 25ms)
+⨯ ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 2116500.2929
+}
+ GET /api/dataset 500 in 112ms (next.js: 2ms, application-code: 110ms)
+ GET /api/dataset 200 in 1773ms (next.js: 3ms, application-code: 1770ms)
+✓ Compiled in 50ms

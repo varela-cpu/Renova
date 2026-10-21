@@ -15,17 +15,17 @@ export function SiteNav() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 -mx-4 mt-0 border-b border-sage/40 bg-ivory/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+    <header className="w-full border-b border-sage/50 bg-gradient-to-r from-forest via-leaf to-forest shadow-lg shadow-forest/15">
+      <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-8 gap-y-3 px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="group flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-forest text-cream shadow-lg shadow-forest/25">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cream text-forest shadow-lg shadow-black/10">
             <LeafMark />
           </span>
           <span className="leading-tight">
-            <span className="block font-display text-xl font-bold tracking-[0.24em] text-forest">
+            <span className="block font-display text-xl font-bold tracking-[0.28em] text-cream">
               RENOVA
             </span>
-            <span className="block text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-forest/60">
+            <span className="block text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-cream/70">
               Simulador de negocio
             </span>
           </span>
@@ -43,8 +43,8 @@ export function SiteNav() {
                 href={link.href}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   active
-                    ? "bg-forest text-cream shadow-md shadow-forest/20"
-                    : "text-forest/70 hover:bg-sage/30 hover:text-forest"
+                    ? "bg-cream text-forest shadow-md shadow-black/10"
+                    : "text-cream/80 hover:bg-cream/15 hover:text-cream"
                 }`}
               >
                 {link.label}
