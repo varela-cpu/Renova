@@ -98,28 +98,38 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="label-eyebrow">Panel financiero</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-forest sm:text-5xl">
-            Detergente en polvo RENOVA
-          </h1>
-          <p className="mt-2 max-w-2xl text-base text-forest/70">
-            Simulador de costos, nómina, recursos, punto de equilibrio y sostenibilidad
-            para el proyecto de maquila en Soacha, Cundinamarca.
-          </p>
+      <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+        <div className="pointer-events-none absolute inset-0">
+          <svg className="absolute -left-10 -top-12 h-48 w-48 opacity-25" viewBox="0 0 200 200">
+            <path d="M40 60 C60 30, 110 30, 140 70 C170 110, 150 160, 100 170 C50 160, 20 110, 40 60 Z" fill="#287a5d" />
+            <path d="M80 70 C95 50, 125 55, 135 80 C145 110, 125 140, 95 145 C70 135, 65 95, 80 70 Z" fill="#3f5d3a" />
+          </svg>
+          <svg className="absolute -right-12 top-6 h-56 w-56 opacity-20" viewBox="0 0 200 200">
+            <path d="M60 70 C80 40, 130 40, 150 80 C170 120, 150 170, 100 175 C50 165, 35 115, 60 70 Z" fill="#145b45" />
+          </svg>
+          <svg className="absolute bottom-[-40px] left-[20%] h-52 w-52 opacity-18" viewBox="0 0 200 200">
+            <path d="M50 80 C70 50, 120 55, 140 90 C155 130, 135 170, 90 165 C55 150, 35 110, 50 80 Z" fill="#287a5d" />
+          </svg>
         </div>
-        <div className="card-solid flex items-center gap-3 px-4 py-2 text-sm text-forest/70">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              source === "postgres" ? "bg-leaf" : "bg-sun"
-            }`}
-          />
-          <span>
-            Fuente: {source === "postgres" ? "Neon" : "Local"}
-          </span>
+        <div className="relative bg-gradient-to-br from-mist via-cream to-ivory px-6 py-10 sm:px-10">
+          <header className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="label-eyebrow">Panel financiero</p>
+              <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-forest sm:text-5xl">
+                Detergente en polvo RENOVA
+              </h1>
+              <p className="mt-2 max-w-2xl text-base text-forest/70">
+                Simulador de costos, nómina, recursos, punto de equilibrio y sostenibilidad
+                para el proyecto de maquila en Soacha, Cundinamarca.
+              </p>
+            </div>
+            <div className="card-solid flex items-center gap-3 px-4 py-2 text-sm text-forest/70">
+              <span className="h-2 w-2 rounded-full bg-leaf" />
+              <span>RENOVA</span>
+            </div>
+          </header>
         </div>
-      </header>
+      </div>
 
       <section className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
         <Card eyebrow="Producto" title="Modelo 3D RENOVA">

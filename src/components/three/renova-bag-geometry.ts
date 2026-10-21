@@ -332,13 +332,19 @@ function displacement(
     ? -0.01 * Math.exp(-Math.pow((y - 0.16) / 0.18, 2)) * body
     : 0;
 
+  // Pliegues del cierre inferior/superior tipo saco (costura plegada)
+  const gusset = Math.sin((t > 0.92 ? (1 - t) * 12 : t * 8)) * 0.008 * (1 - Math.min(1, t * 0.6));
+  const gussetTop = smoothstep(0.86, 0.94, t) * (1 - smoothstep(0.99, 1.0, t))
+    ? Math.sin(point.perimeter * Math.PI * 2 * 11 + t * 40) * 0.005
+    : 0;
+
   // Arrugas en el cuello
   const crimp =
     smoothstep(0.88, 0.93, t) * (1 - smoothstep(0.985, 1.0, t))
-      ? (Math.sin((t - 0.88) * Math.PI * 2 * 16) + Math.sin((t - 0.9) * Math.PI * 2 * 9)) * 0.0036
+      ? (Math.sin((t - 0.88) * Math.PI * 2 * 16) + Math.sin((t - 0.9) * Math.PI * 2 * 9)) * 0.004
       : 0;
 
-  return bulge + fold + crease + crimp;
+  return bulge + fold + crease + gusset + gussetTop + crimp;
 }
 
 /** Distribucion vertical de las filas: mas densidad en base y sellado. */
@@ -466,9 +472,9 @@ function createCapGeometry(
     profile.cornerRadius,
   );
   const rect = uvRectFromPixels(ATLAS_REGIONS[which]);
-  const rings = 4;
+  const rings = 8;
   const count = section.length;
-  const dish = which === "BOTTOM" ? 0.008 : 0.002;
+  const dish = which === "BOTTOM" ? 0.012 : 0.006;
 
   const positions: number[] = [];
   const uvs: number[] = [];

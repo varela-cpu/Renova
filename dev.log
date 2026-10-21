@@ -168,3 +168,209 @@ See more: https://nextjs.org/docs/app/guides/local-development
 ✓ Compiled in 37ms
 ✓ Compiled in 53ms
 ✓ Compiled in 34ms
+✓ Compiled in 53ms
+✓ Compiled in 54ms
+✓ Compiled in 68ms
+✓ Compiled in 448ms
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:100:3
+Error: Expression expected
+   98 |
+   99 |   return (
+> 100 |   return (
+      |   ^^^^^^
+  101 |     <div className="flex flex-col gap-8">
+  102 |       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
+  103 |         <div className="pointer-events-none absolute inset-0">
+
+Parsing ecmascript source code failed
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 58ms
+ GET / 200 in 29ms (next.js: 4ms, application-code: 26ms)
