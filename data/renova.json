@@ -1,0 +1,345 @@
+{
+  "materials": [
+    {
+      "id": "mat-las",
+      "name": "Sulfonato de alquilbenceno lineal sódico (LAS)",
+      "supplier": "Química del Caribe",
+      "reference": "LAS-70",
+      "unit": "kg",
+      "compositionPct": 10,
+      "unitsPerProduct": 0,
+      "unitCost": 5200,
+      "isPackaging": false,
+      "sortOrder": 1
+    },
+    {
+      "id": "mat-carbonato",
+      "name": "Carbonato de sodio",
+      "supplier": "Mineralex Andina",
+      "reference": "CENIZA-99",
+      "unit": "kg",
+      "compositionPct": 20,
+      "unitsPerProduct": 0,
+      "unitCost": 1450,
+      "isPackaging": false,
+      "sortOrder": 2
+    },
+    {
+      "id": "mat-sulfato",
+      "name": "Sulfato de sodio",
+      "supplier": "Mineralex Andina",
+      "reference": "SULF-IND",
+      "unit": "kg",
+      "compositionPct": 45,
+      "unitsPerProduct": 0,
+      "unitCost": 980,
+      "isPackaging": false,
+      "sortOrder": 3
+    },
+    {
+      "id": "mat-silicato",
+      "name": "Silicato de sodio",
+      "supplier": "Silicatos del Oriente",
+      "reference": "SIL-LIQUIDO",
+      "unit": "kg",
+      "compositionPct": 5,
+      "unitsPerProduct": 0,
+      "unitCost": 2450,
+      "isPackaging": false,
+      "sortOrder": 4
+    },
+    {
+      "id": "mat-percarbonato",
+      "name": "Percarbonato de sodio",
+      "supplier": "Química del Caribe",
+      "reference": "PC-70",
+      "unit": "kg",
+      "compositionPct": 10,
+      "unitsPerProduct": 0,
+      "unitCost": 4100,
+      "isPackaging": false,
+      "sortOrder": 5
+    },
+    {
+      "id": "mat-zeolita",
+      "name": "Zeolita",
+      "supplier": "Silicatos del Oriente",
+      "reference": "ZEO-4A",
+      "unit": "kg",
+      "compositionPct": 7,
+      "unitsPerProduct": 0,
+      "unitCost": 1650,
+      "isPackaging": false,
+      "sortOrder": 6
+    },
+    {
+      "id": "mat-cmc",
+      "name": "Carboximetilcelulosa (CMC)",
+      "supplier": "Polímeros Andinos",
+      "reference": "CMC-GR",
+      "unit": "kg",
+      "compositionPct": 1,
+      "unitsPerProduct": 0,
+      "unitCost": 12500,
+      "isPackaging": false,
+      "sortOrder": 7
+    },
+    {
+      "id": "mat-fragancia",
+      "name": "Fragancia floral y auxiliares",
+      "supplier": "Aromas del Eje",
+      "reference": "AF-FLORAL",
+      "unit": "kg",
+      "compositionPct": 2,
+      "unitsPerProduct": 0,
+      "unitCost": 38000,
+      "isPackaging": false,
+      "sortOrder": 8
+    },
+    {
+      "id": "mat-empaque",
+      "name": "Empaque rígido en fibra de bagazo de caña (5 kg)",
+      "supplier": "Piloto",
+      "reference": "ENV-BAG-005",
+      "unit": "und",
+      "compositionPct": null,
+      "unitsPerProduct": 1,
+      "unitCost": 2400,
+      "isPackaging": true,
+      "sortOrder": 9
+    },
+    {
+      "id": "mat-etiqueta",
+      "name": "Etiqueta adhesiva impresa",
+      "supplier": "Litografía Caldas",
+      "reference": "ETQ-005",
+      "unit": "und",
+      "compositionPct": null,
+      "unitsPerProduct": 1,
+      "unitCost": 620,
+      "isPackaging": true,
+      "sortOrder": 10
+    },
+    {
+      "id": "mat-transporte",
+      "name": "Transporte de producto terminado a distribución",
+      "supplier": "Transportes del Eje",
+      "reference": "TRN-LCL",
+      "unit": "und",
+      "compositionPct": null,
+      "unitsPerProduct": 1,
+      "unitCost": 1150,
+      "isPackaging": false,
+      "sortOrder": 11
+    }
+  ],
+  "employees": [
+    {
+      "id": "emp-gerente",
+      "position": "Gerente general",
+      "contractType": "Indefinido",
+      "headcount": 1,
+      "baseSalary": 4200000,
+      "benefitsPct": 0.55,
+      "sortOrder": 1
+    },
+    {
+      "id": "emp-planta",
+      "position": "Supervisor de planta",
+      "contractType": "Indefinido",
+      "headcount": 1,
+      "baseSalary": 2600000,
+      "benefitsPct": 0.55,
+      "sortOrder": 2
+    },
+    {
+      "id": "emp-operario",
+      "position": "Operario de producción",
+      "contractType": "Indefinido",
+      "headcount": 4,
+      "baseSalary": 1400000,
+      "benefitsPct": 0.55,
+      "sortOrder": 3
+    },
+    {
+      "id": "emp-empaque",
+      "position": "Operario de empaque",
+      "contractType": "Temporal",
+      "headcount": 3,
+      "baseSalary": 1300000,
+      "benefitsPct": 0.55,
+      "sortOrder": 4
+    },
+    {
+      "id": "emp-comercial",
+      "position": "Coordinador comercial",
+      "contractType": "Indefinido",
+      "headcount": 1,
+      "baseSalary": 2800000,
+      "benefitsPct": 0.55,
+      "sortOrder": 5
+    },
+    {
+      "id": "emp-auxiliar",
+      "position": "Auxiliar administrativo",
+      "contractType": "Indefinido",
+      "headcount": 1,
+      "baseSalary": 1500000,
+      "benefitsPct": 0.55,
+      "sortOrder": 6
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-t-mixer",
+      "kind": "TANGIBLE",
+      "concept": "Mezcladora / homogeneizadora industrial",
+      "detail": "Mezcladora de polvo 200 kg, acero inoxidable",
+      "value": 18500000,
+      "recurrence": "UNICO",
+      "sortOrder": 1
+    },
+    {
+      "id": "res-t-sealer",
+      "kind": "TANGIBLE",
+      "concept": "Selladora de bolsas",
+      "detail": "Sellado por Nephi, 220 mm",
+      "value": 6800000,
+      "recurrence": "UNICO",
+      "sortOrder": 2
+    },
+    {
+      "id": "res-t-scale",
+      "kind": "TANGIBLE",
+      "concept": "Báscula de plataforma",
+      "detail": "Capacidad 300 kg, resolución 10 g",
+      "value": 1450000,
+      "recurrence": "UNICO",
+      "sortOrder": 3
+    },
+    {
+      "id": "res-t-bodega",
+      "kind": "TANGIBLE",
+      "concept": "Bodega de almacenamiento (arrendada)",
+      "detail": "120 m2 en Manizales, Bodega 4",
+      "value": 3200000,
+      "recurrence": "RECURRENTE",
+      "sortOrder": 4
+    },
+    {
+      "id": "res-t-equipos",
+      "kind": "TANGIBLE",
+      "concept": "Equipos de oficina y computación",
+      "detail": "3 equipos, impresión, software de gestión",
+      "value": 5400000,
+      "recurrence": "RECURRENTE",
+      "sortOrder": 5
+    },
+    {
+      "id": "res-t-vehiculo",
+      "kind": "TANGIBLE",
+      "concept": "Motocargo de reparto",
+      "detail": "Motocargo 150 cc para distribución local",
+      "value": 9800000,
+      "recurrence": "UNICO",
+      "sortOrder": 6
+    },
+    {
+      "id": "res-t-mantenimiento",
+      "kind": "TANGIBLE",
+      "concept": "Mantenimiento y repuestos de planta",
+      "detail": "Preventivo mensual de equipos de producción",
+      "value": 650000,
+      "recurrence": "RECURRENTE",
+      "sortOrder": 7
+    },
+    {
+      "id": "res-i-marca",
+      "kind": "INTANGIBLE",
+      "concept": "Marca RENOVA",
+      "detail": "Registro de marca ante la SIC, diseño de identidad",
+      "value": 4800000,
+      "recurrence": "UNICO",
+      "sortOrder": 1
+    },
+    {
+      "id": "res-i-nso",
+      "kind": "INTANGIBLE",
+      "concept": "Notificación sanitaria NSO ante INVIMA",
+      "detail": "Trámite de notificación sanitaria de higiene doméstica",
+      "value": 2400000,
+      "recurrence": "UNICO",
+      "sortOrder": 2
+    },
+    {
+      "id": "res-i-formula",
+      "kind": "INTANGIBLE",
+      "concept": "Fórmula y know-how de fabricación",
+      "detail": "Desarrollo, estabilización y pruebas de lavado",
+      "value": 6500000,
+      "recurrence": "UNICO",
+      "sortOrder": 3
+    },
+    {
+      "id": "res-i-diseno",
+      "kind": "INTANGIBLE",
+      "concept": "Diseño de empaque y arte",
+      "detail": "Estructura, ilustración y preprensa",
+      "value": 3800000,
+      "recurrence": "UNICO",
+      "sortOrder": 4
+    },
+    {
+      "id": "res-i-certificaciones",
+      "kind": "INTANGIBLE",
+      "concept": "Certificaciones y ensayos de laboratorio",
+      "detail": "Ensayos de desempeño, ficha de seguridad, BPM",
+      "value": 5200000,
+      "recurrence": "UNICO",
+      "sortOrder": 5
+    },
+    {
+      "id": "res-i-web",
+      "kind": "INTANGIBLE",
+      "concept": "Sitio web y tienda en línea",
+      "detail": "Desarrollo, dominio y hosting",
+      "value": 420000,
+      "recurrence": "RECURRENTE",
+      "sortOrder": 6
+    },
+    {
+      "id": "res-i-capacitacion",
+      "kind": "INTANGIBLE",
+      "concept": "Capacitación del equipo comercial",
+      "detail": "Entrenamiento en producto y técnica de venta",
+      "value": 380000,
+      "recurrence": "RECURRENTE",
+      "sortOrder": 7
+    }
+  ],
+  "products": [
+    {
+      "id": "prd-005",
+      "code": "REN-DET-005",
+      "name": "Detergente en polvo para ropa",
+      "weightKg": 5,
+      "pvp": 21900
+    },
+    {
+      "id": "prd-003",
+      "code": "REN-DET-003",
+      "name": "Detergente en polvo para ropa",
+      "weightKg": 3,
+      "pvp": 14900
+    }
+  ],
+  "settings": {
+    "currency": "COP",
+    "ivaPct": 0.19,
+    "indirectPct": 0.08,
+    "targetUnits": 100000,
+    "activeProductId": "prd-005",
+    "monthlyVolume": 100000,
+    "minMarginPct": 0.2
+  }
+}

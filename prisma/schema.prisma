@@ -1,0 +1,91 @@
+// RENOVA - Modelo de datos
+// Base: ficha técnica preliminar del producto (REN-DET-003 / REN-DET-005)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Materiales e insumos directos.
+/// La cantidad por unidad se deriva de la composición porcentual de la ficha
+/// técnica (% en masa del producto terminado) o de unidades por unidad de venta.
+model Material {
+  id              String   @id @default(cuid())
+  name            String
+  supplier        String   @default("")
+  reference       String   @default("")
+  /// kg | und | L | m
+  unit            String   @default("kg")
+  /// % en masa del producto terminado (null para empaque, etiqueta, servicios)
+  compositionPct  Float?
+  /// unidades por unidad de venta (empaque, etiqueta, transporte)
+  unitsPerProduct Float   @default(0)
+  /// costo unitario en COP (por kg, por unidad, por litro...)
+  unitCost        Float    @default(0)
+  isPackaging     Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
+/// Nómina de personal.
+model Employee {
+  id           String   @id @default(cuid())
+  position     String
+  /// Indefinido | Temporal | Prestación de servicios
+  contractType String   @default("Indefinido")
+  headcount    Int      @default(1)
+  /// salario base mensual en COP
+  baseSalary   Float    @default(0)
+  /// factor de prestaciones y aportes (0.55 = 55%)
+  benefitsPct  Float    @default(0.55)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sortOrder])
+}
+
+/// Recursos tangibles e intangibles.
+/// kind: TANGIBLE | INTANGIBLE
+/// recurrence: UNICO | RECURRENTE
+model Resource {
+  id         String   @id @default(cuid())
+  kind       String
+  concept    String
+  detail     String   @default("")
+  /// valor en COP
+  value      Float    @default(0)
+  recurrence String   @default("RECURRENTE")
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([kind, sortOrder])
+}
+
+/// Presentaciones comerciales del producto.
+model Product {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  /// peso neto en kg
+  weightKg  Float
+  /// precio al consumidor sin IVA en COP
+  pvp       Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Parámetros de la simulación (clave/valor serializado en JSON).
+model Setting {
+  key   String @id
+  value String
+}
