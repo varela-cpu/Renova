@@ -116,7 +116,7 @@ export default function DashboardPage() {
             }`}
           />
           <span>
-            Fuente: {source === "postgres" ? "Neon + Prisma" : "Archivo local (data/renova.json)"}
+            Fuente: {source === "postgres" ? "Neon" : "Local"}
           </span>
         </div>
       </header>

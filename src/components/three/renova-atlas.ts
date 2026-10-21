@@ -31,11 +31,11 @@ export const FONT_DISPLAY =
 export const FONT_SANS =
   '"Avenir Next", "Segoe UI", "Trebuchet MS", system-ui, -apple-system, sans-serif';
 
-/** Pixels por unidad de mundo (la bolsa mide 1.0 x 1.75 unidades). */
+/** Atlas UV para la bolsa RENOVA - estilo papel ecológico artesanal */
 export const PX_PER_UNIT = 1024;
 
-export const ATLAS_WIDTH = 2688;
-export const ATLAS_HEIGHT = 2048;
+export const ATLAS_WIDTH = 2048;
+export const ATLAS_HEIGHT = 1536;
 
 export type RegionId =
   | "FRONT"
@@ -105,11 +105,13 @@ export type UvRect = { u0: number; u1: number; v0: number; v1: number };
 
 /** Convierte un rectangulo de pixels del canvas a un rectangulo UV. */
 export function uvRectFromPixels(rect: PixelRect): UvRect {
+  const W = ATLAS_WIDTH;
+  const H = ATLAS_HEIGHT;
   return {
-    u0: rect.x / ATLAS_WIDTH,
-    u1: (rect.x + rect.w) / ATLAS_WIDTH,
-    v0: 1 - (rect.y + rect.h) / ATLAS_HEIGHT,
-    v1: 1 - rect.y / ATLAS_HEIGHT,
+    u0: rect.x / W,
+    u1: (rect.x + rect.w) / W,
+    v0: 1 - (rect.y + rect.h) / H,
+    v1: 1 - rect.y / H,
   };
 }
 

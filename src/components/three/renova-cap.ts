@@ -217,32 +217,10 @@ function createScrewCap(radius: number, ribs: number): THREE.Group {
   return group;
 }
 
-/**
- * Ensambla el sistema de cierre sobre la superficie frontal de la bolsa.
- * Devuelve un grupo listo para anadir al producto.
- */
 export function createClosure(
   options: ClosureOptions = DEFAULT_CLOSURE,
   dims: BagDimensions = DEFAULT_DIMENSIONS,
 ): THREE.Group {
   const group = new THREE.Group();
-
-  const frame = createHandleFrame(options);
-  group.add(frame);
-
-  const seat = createCapSeat(options.capRadius);
-  seat.position.y = -options.baseHeight * 0.2;
-  group.add(seat);
-
-  const cap = createScrewCap(options.capRadius, options.ribs);
-  cap.rotation.x = Math.PI / 2;
-  cap.position.set(0, -options.baseHeight * 0.2, 0.04);
-  group.add(cap);
-
-  // Colocacion sobre la cara frontal, siguiendo su inclinacion
-  const y = options.height;
-  group.position.set(0, y, frontSurfaceZ(y, dims) - 0.006);
-  group.rotation.x = frontSurfaceTilt(y, dims);
-
   return group;
 }
