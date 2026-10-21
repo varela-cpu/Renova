@@ -28,15 +28,15 @@ export type BagDimensions = {
 };
 
 export const DEFAULT_DIMENSIONS: BagDimensions = {
-  height: 1.72,
-  halfWidth: 0.52,
-  halfDepth: 0.19,
-  cornerRadius: 0.105,
+  height: 1.68,
+  halfWidth: 0.56,
+  halfDepth: 0.205,
+  cornerRadius: 0.095,
 };
 
 /** Amplitud del abombado de las caras frontales. */
-const FRONT_BULGE = 0.016;
-const SIDE_BULGE = 0.012;
+const FRONT_BULGE = 0.022;
+const SIDE_BULGE = 0.018;
 
 type ProfileKey = { t: number; w: number; d: number; r: number };
 
@@ -47,14 +47,13 @@ type ProfileKey = { t: number; w: number; d: number; r: number };
  *  - la zona superior se aplana para el sellado
  */
 const PROFILE_KEYS: ProfileKey[] = [
-  { t: 0.0, w: 1.08, d: 1.26, r: 0.94 },
-  { t: 0.1, w: 1.04, d: 1.12, r: 0.98 },
-  { t: 0.28, w: 1.0, d: 1.04, r: 1.02 },
-  { t: 0.55, w: 0.992, d: 1.012, r: 1.0 },
-  { t: 0.78, w: 0.98, d: 0.97, r: 0.94 },
-  { t: 0.92, w: 0.94, d: 0.86, r: 0.86 },
-  { t: 0.98, w: 0.9, d: 0.7, r: 0.74 },
-  { t: 1.0, w: 0.88, d: 0.62, r: 0.66 },
+  { t: 0.0, w: 1.14, d: 1.32, r: 0.92 },
+  { t: 0.12, w: 1.08, d: 1.18, r: 0.96 },
+  { t: 0.32, w: 1.02, d: 1.08, r: 1.0 },
+  { t: 0.58, w: 0.998, d: 1.02, r: 0.98 },
+  { t: 0.82, w: 0.98, d: 0.95, r: 0.9 },
+  { t: 0.94, w: 0.95, d: 0.84, r: 0.82 },
+  { t: 1.0, w: 0.94, d: 0.78, r: 0.78 },
 ];
 
 function smoothstep(edge0: number, edge1: number, x: number): number {
@@ -316,26 +315,27 @@ function displacement(
     point.region === "FRONT" || point.region === "BACK" ? FRONT_BULGE : SIDE_BULGE;
   const bulge = faceBulge(point.region, point.s, amount) * body;
 
-  // Pliegues suaves tipo bolsa flexible
+  // Pliegues arrugados tipo saco de cemento
   const foldWeight =
-    point.region === "FRONT" || point.region === "BACK" ? 0.28 : 0.8;
-  const foldEnvelope = Math.exp(-Math.pow((y - 0.16) / 0.18, 2));
+    point.region === "FRONT" || point.region === "BACK" ? 0.34 : 0.9;
+  const foldEnvelope = Math.exp(-Math.pow((y - 0.14) / 0.16, 2));
   const fold =
-    Math.sin(point.perimeter * Math.PI * 2 * 7 + y * 4.8) *
-    0.009 *
+    Math.sin(point.perimeter * Math.PI * 2 * 9 + y * 6.2) *
+    0.012 *
     foldEnvelope *
     foldWeight *
-    body;
+    body +
+    Math.sin(point.perimeter * Math.PI * 2 * 5 + y * 3.4) * 0.006 * foldEnvelope * body;
 
-  // Pliegue vertical en las esquinas
+  // Pliegues verticales en esquinas
   const crease = point.region.startsWith("CORNER")
-    ? -0.008 * Math.exp(-Math.pow((y - 0.18) / 0.2, 2)) * body
+    ? -0.01 * Math.exp(-Math.pow((y - 0.16) / 0.18, 2)) * body
     : 0;
 
-  // Relleno ligero en el sellado superior
+  // Arrugas en el cuello
   const crimp =
-    smoothstep(0.9, 0.94, t) * (1 - smoothstep(0.988, 1.0, t))
-      ? Math.sin((t - 0.9) * Math.PI * 2 * 12) * 0.0028
+    smoothstep(0.88, 0.93, t) * (1 - smoothstep(0.985, 1.0, t))
+      ? (Math.sin((t - 0.88) * Math.PI * 2 * 16) + Math.sin((t - 0.9) * Math.PI * 2 * 9)) * 0.0036
       : 0;
 
   return bulge + fold + crease + crimp;
@@ -347,9 +347,9 @@ function buildRows(dims: BagDimensions): number[] {
   const push = (from: number, to: number, count: number) => {
     for (let i = 0; i < count; i++) rows.push(from + ((to - from) * i) / count);
   };
-  push(0, 0.36, 24);
-  push(0.36, 1.48, 38);
-  push(1.48, dims.height, 26);
+  push(0, 0.32, 28);
+  push(0.32, 1.44, 42);
+  push(1.44, dims.height, 28);
   rows.push(dims.height);
   return rows;
 }

@@ -72,13 +72,13 @@ export function createRenovaBagTexture(
 export function createBagMaterial(texture: THREE.Texture): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
     map: texture,
-    roughness: 0.62,
+    roughness: 0.72,
     metalness: 0,
-    clearcoat: 0.12,
-    clearcoatRoughness: 0.72,
-    sheen: 0.18,
-    sheenColor: new THREE.Color("#e6efe7"),
-    envMapIntensity: 0.6,
+    clearcoat: 0.08,
+    clearcoatRoughness: 0.8,
+    sheen: 0.12,
+    sheenColor: new THREE.Color("#f0ede2"),
+    envMapIntensity: 0.5,
   });
 }
 
