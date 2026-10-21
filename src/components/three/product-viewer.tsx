@@ -68,7 +68,7 @@ export function ProductViewer({
     <Canvas
       shadows
       dpr={[1, 1.5]}
-      camera={{ position: [2.1, 1.2, 2.6], fov: 28, near: 0.1, far: 60 }}
+      camera={{ position: [1.8, 1.05, 2.2], fov: 26, near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
@@ -115,9 +115,11 @@ export function ProductViewer({
 
       <OrbitControls
         enablePan={false}
-        enableZoom={false}
+        enableZoom={true}
         enableRotate={false}
         enableDamping={false}
+        minDistance={1.4}
+        maxDistance={3.2}
         target={[0, 0.9, 0]}
       />
     </Canvas>

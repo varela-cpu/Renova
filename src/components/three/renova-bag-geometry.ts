@@ -28,10 +28,10 @@ export type BagDimensions = {
 };
 
 export const DEFAULT_DIMENSIONS: BagDimensions = {
-  height: 1.68,
-  halfWidth: 0.56,
-  halfDepth: 0.205,
-  cornerRadius: 0.095,
+  height: 1.58,
+  halfWidth: 0.52,
+  halfDepth: 0.19,
+  cornerRadius: 0.09,
 };
 
 /** Amplitud del abombado de las caras frontales. */

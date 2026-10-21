@@ -100,15 +100,24 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-8">
       <div className="relative overflow-hidden rounded-[1.5rem] border border-sage/40">
         <div className="pointer-events-none absolute inset-0">
-          <svg className="absolute -left-10 -top-12 h-48 w-48 opacity-25" viewBox="0 0 200 200">
+          <svg className="absolute -left-16 -top-14 h-64 w-64 opacity-30" viewBox="0 0 200 200">
             <path d="M40 60 C60 30, 110 30, 140 70 C170 110, 150 160, 100 170 C50 160, 20 110, 40 60 Z" fill="#287a5d" />
-            <path d="M80 70 C95 50, 125 55, 135 80 C145 110, 125 140, 95 145 C70 135, 65 95, 80 70 Z" fill="#3f5d3a" />
+            <path d="M85 75 C98 58, 122 62, 130 82 C138 108, 122 132, 98 138 C78 130, 74 98, 85 75 Z" fill="#3f5d3a" />
+            <path d="M55 90 C65 78, 82 82, 88 95 C94 112, 82 128, 66 126 C54 118, 50 102, 55 90 Z" fill="#145b45" />
           </svg>
-          <svg className="absolute -right-12 top-6 h-56 w-56 opacity-20" viewBox="0 0 200 200">
+          <svg className="absolute -right-20 top-2 h-72 w-72 opacity-28" viewBox="0 0 200 200">
             <path d="M60 70 C80 40, 130 40, 150 80 C170 120, 150 170, 100 175 C50 165, 35 115, 60 70 Z" fill="#145b45" />
+            <path d="M90 88 C102 72, 122 76, 130 94 C138 118, 122 140, 98 144 C82 136, 78 108, 90 88 Z" fill="#287a5d" />
           </svg>
-          <svg className="absolute bottom-[-40px] left-[20%] h-52 w-52 opacity-18" viewBox="0 0 200 200">
+          <svg className="absolute bottom-[-60px] left-[18%] h-68 w-68 opacity-26" viewBox="0 0 200 200">
             <path d="M50 80 C70 50, 120 55, 140 90 C155 130, 135 170, 90 165 C55 150, 35 110, 50 80 Z" fill="#287a5d" />
+            <path d="M78 95 C90 80, 110 84, 118 100 C126 122, 110 144, 88 148 C72 140, 68 114, 78 95 Z" fill="#3f5d3a" />
+          </svg>
+          <svg className="absolute top-[30%] left-[-30px] h-40 w-40 opacity-22 rotate-12" viewBox="0 0 200 200">
+            <path d="M70 60 C88 42, 116 48, 126 70 C134 96, 116 122, 88 126 C66 116, 58 84, 70 60 Z" fill="#3f5d3a" />
+          </svg>
+          <svg className="absolute top-[20%] right-[10%] h-36 w-36 opacity-20 -rotate-6" viewBox="0 0 200 200">
+            <path d="M66 64 C82 48, 108 52, 118 74 C126 98, 110 122, 86 126 C68 116, 60 88, 66 64 Z" fill="#287a5d" />
           </svg>
         </div>
         <div className="relative bg-gradient-to-br from-mist via-cream to-ivory px-6 py-10 sm:px-10">

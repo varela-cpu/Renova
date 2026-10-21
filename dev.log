@@ -374,3 +374,9 @@ Import traces:
     ./src/app/page.tsx [Server Component] 
 ✓ Compiled in 58ms
  GET / 200 in 29ms (next.js: 4ms, application-code: 26ms)
+ GET /matriz/insumos 200 in 30ms (next.js: 2ms, application-code: 28ms)
+ GET / 200 in 24ms (next.js: 1.3ms, application-code: 22ms)
+✓ Compiled in 37ms
+✓ Compiled in 38ms
+✓ Compiled in 38ms
+✓ Compiled in 135ms
