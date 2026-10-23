@@ -76,17 +76,17 @@ export type Dataset = {
   settings: Settings;
 };
 
-export type VolumePreset = 50000 | 100000 | 250000 | 500000;
+export type VolumePreset = 25000 | 50000 | 100000 | 184529;
 
-export const VOLUME_PRESETS: VolumePreset[] = [50000, 100000, 250000, 500000];
+export const VOLUME_PRESETS: readonly VolumePreset[] = [25000, 50000, 100000, 184529];
 
 export const DEFAULT_SETTINGS: Settings = {
   currency: "COP",
   ivaPct: 0.19,
   indirectPct: 0.08,
-  targetUnits: 100000,
+  targetUnits: 49208,
   activeProductId: "prd-005",
-  monthlyVolume: 100000,
+  monthlyVolume: 49208,
   minMarginPct: 0.2,
 };
 
