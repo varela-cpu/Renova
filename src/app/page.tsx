@@ -7,6 +7,7 @@ import { useRenova } from "@/components/renova-provider";
 import { ProductViewer } from "@/components/three/product-viewer";
 import { formatCop, formatCopShort, formatNumber, formatPercent } from "@/lib/format";
 import { VOLUME_PRESETS } from "@/lib/domain";
+import { empleados, FACTOR_CARGA } from "../../data/payroll";
 
 function Card({
   title,
@@ -69,6 +70,19 @@ export default function DashboardPage() {
     () => products.find((p) => p.id === productId) ?? products[0] ?? null,
     [products, productId],
   );
+  const payrollResumen = useMemo(() => {
+    const base = empleados.reduce((acc, empleado) => acc + empleado.devengado, 0);
+    const costo = empleados.reduce((acc, empleado) => acc + empleado.costoTotal, 0);
+    const personas = empleados.reduce((acc, empleado) => acc + empleado.personas, 0);
+    const volumen = Math.max(1, simulation?.volume ?? 0);
+    return {
+      base,
+      costo,
+      cargas: costo - base,
+      personas,
+      porUnidad: costo / volumen,
+    };
+  }, [simulation?.volume]);
 
   if (status === "loading") {
     return (
@@ -349,27 +363,86 @@ export default function DashboardPage() {
         </Card>
       </section>
 
-      <section className="card flex flex-wrap items-center justify-between gap-4 px-6 py-5">
-        <div className="flex items-center gap-4">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sage/25 text-forest">
-            <Wallet className="h-6 w-6" aria-hidden />
-          </span>
-          <div>
-            <p className="label-eyebrow">Módulo</p>
-            <h2 className="mt-1 font-display text-xl font-semibold text-forest">
-              Costos de personal
-            </h2>
+      <section className="card px-6 py-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sage/25 text-forest">
+              <Wallet className="h-6 w-6" aria-hidden />
+            </span>
+            <div>
+              <p className="label-eyebrow">Costos de personal</p>
+              <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-forest">
+                Nómina real del turno
+              </h2>
+              <p className="text-sm text-forest/70">
+                Modelo ilustrativo con factor de carga {formatPercent(FACTOR_CARGA, 0)} ·{" "}
+                {formatNumber(payrollResumen.personas)} personas
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/costos-personal"
+            className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-leaf"
+          >
+            Ver desglose
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="card-solid px-5 py-4 sm:col-span-2">
+            <p className="label-eyebrow">Costo real mensual</p>
+            <p className="mt-1 font-display text-4xl font-semibold tracking-tight text-forest">
+              {formatCopShort(payrollResumen.costo)}
+            </p>
+            <p className="text-sm text-forest/70">{formatCop(payrollResumen.costo)}</p>
+            <div className="mt-5 flex h-2 overflow-hidden rounded-full bg-sage/30">
+              <div
+                className="bg-forest"
+                style={{
+                  width: `${
+                    (payrollResumen.base / Math.max(1, payrollResumen.costo)) * 100
+                  }%`,
+                }}
+              />
+              <div
+                className="bg-sun"
+                style={{
+                  width: `${
+                    (payrollResumen.cargas / Math.max(1, payrollResumen.costo)) * 100
+                  }%`,
+                }}
+              />
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-forest/70">
+              <span>
+                Salario base{" "}
+                {formatPercent(payrollResumen.base / Math.max(1, payrollResumen.costo))}
+              </span>
+              <span>
+                Cargas{" "}
+                {formatPercent(payrollResumen.cargas / Math.max(1, payrollResumen.costo))}
+              </span>
+            </div>
+          </div>
+          <div className="card-solid flex flex-col justify-center gap-2 px-5 py-4">
+            <p className="label-eyebrow">Por unidad</p>
+            <p className="font-display text-3xl font-semibold tracking-tight text-forest">
+              {formatCop(payrollResumen.porUnidad)}
+            </p>
             <p className="text-sm text-forest/70">
-              Desglose del costo real de nómina por cargo, área y concepto.
+              Al volumen de {formatNumber(simulation.volume)} und/mes
+            </p>
+          </div>
+          <div className="card-solid flex flex-col justify-center gap-2 px-5 py-4">
+            <p className="label-eyebrow">Factor de carga</p>
+            <p className="font-display text-3xl font-semibold tracking-tight text-leaf">
+              {FACTOR_CARGA.toFixed(2)}x
+            </p>
+            <p className="text-sm text-forest/70">
+              {formatNumber(payrollResumen.personas)} personas en un turno
             </p>
           </div>
         </div>
-        <Link
-          href="/costos-personal"
-          className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-leaf"
-        >
-          Abrir módulo
-        </Link>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
