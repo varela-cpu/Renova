@@ -143,20 +143,6 @@ function setFont(
   ctx.font = `${weight} ${size}px ${family}`;
 }
 
-/** Ancho de un texto con interletraje manual. */
-function _trackedWidth(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  tracking: number,
-): number {
-  const chars = [...text];
-  const widths = chars.map((c) => ctx.measureText(c).width);
-  return (
-    widths.reduce((acc, w) => acc + w, 0) +
-    tracking * Math.max(0, chars.length - 1)
-  );
-}
-
 /**
  * Texto centrado con interletraje manual (funciona en todos los navegadores).
  * `size` y `weight` controlan el cuerpo; el tracking se aplica por letra.

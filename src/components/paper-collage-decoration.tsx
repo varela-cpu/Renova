@@ -3,7 +3,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 type CutoutType =
   | "leaf"
@@ -238,7 +237,7 @@ function PaperCutout({ def, reduceMotion }: { def: CutoutDef; reduceMotion: bool
   const current = useRef(new THREE.Euler(def.rot[0], def.rot[1], def.rot[2]));
   const { pointer } = useThree();
 
-  const { geometry, material, shadowMat } = useMemo(() => {
+  const { geometry, material } = useMemo(() => {
     const shape = createShape(def.type);
     const geo = new THREE.ExtrudeGeometry(shape, {
       depth: 0.08,
@@ -259,9 +258,7 @@ function PaperCutout({ def, reduceMotion }: { def: CutoutDef; reduceMotion: bool
       bumpMap: tex,
       bumpScale: 0.01,
     });
-    const sGeo = new THREE.CircleGeometry(0.6, 32);
-    const sMat = new THREE.MeshBasicMaterial({ color: 0x1a3f2f, transparent: true, opacity: 0.16 });
-    return { geometry: geo, material: mat, shadowMat: sMat, shadowGeo: sGeo };
+    return { geometry: geo, material: mat };
   }, [def.type, def.color]);
 
   useFrame((state, delta) => {
@@ -277,12 +274,10 @@ function PaperCutout({ def, reduceMotion }: { def: CutoutDef; reduceMotion: bool
       target.current.set(def.rot[0] - ny, def.rot[1] + nx, def.rot[2] + nx * 0.6);
       group.current.position.z = -1.2;
       group.current.scale.lerp(new THREE.Vector3(def.scale * 1.08, def.scale * 1.08, def.scale * 1.08), delta * 10);
-      if (shadowMat) shadowMat.opacity = 0.22;
     } else {
       target.current.set(def.rot[0], def.rot[1], def.rot[2]);
       group.current.position.z = def.pos[2];
       group.current.scale.lerp(new THREE.Vector3(def.scale, def.scale, def.scale), delta * 10);
-      if (shadowMat) shadowMat.opacity = 0.16;
     }
     current.current.x = THREE.MathUtils.lerp(current.current.x, target.current.x, delta * 12);
     current.current.y = THREE.MathUtils.lerp(current.current.y, target.current.y, delta * 12);
@@ -308,7 +303,7 @@ function PaperCutout({ def, reduceMotion }: { def: CutoutDef; reduceMotion: bool
       <mesh ref={mesh} geometry={geometry} material={material} castShadow receiveShadow />
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, -0.02]} scale={[0.9, 0.9, 1]}>
         <circleGeometry args={[0.6, 32]} />
-        <meshBasicMaterial color="#1a3f2f" transparent opacity={0.16} />
+        <meshBasicMaterial color="#1a3f2f" transparent opacity={hovered ? 0.22 : 0.16} />
       </mesh>
     </group>
   );

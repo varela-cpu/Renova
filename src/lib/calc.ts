@@ -92,7 +92,9 @@ export type Simulation = {
   contributionPerUnit: number;
   /** margen de contribución porcentual */
   contributionPct: number;
-  /** punto de equilibrio mensual en unidades */
+  /** costos fijos considerados en el equilibrio (recurrentes + nómina) */
+  breakEvenFixedMonthly: number;
+  /** punto de equilibrio mensual en unidades, incluyendo nómina */
   breakEvenUnits: number;
   /** ingreso total del mes a precio de venta */
   revenueMonth: number;
@@ -237,8 +239,9 @@ export function computeSimulation(input: {
   const contributionPerUnit = pvp - costMaterialPerUnit - indirectPerUnit;
   const contributionPct = pvp > 0 ? contributionPerUnit / pvp : 0;
 
+  const breakEvenFixedMonthly = resourceSummary.fixedMonthly + payrollSummary.totalMonth;
   const breakEvenUnits =
-    contributionPerUnit > 0 ? resourceSummary.fixedMonthly / contributionPerUnit : Infinity;
+    contributionPerUnit > 0 ? breakEvenFixedMonthly / contributionPerUnit : Infinity;
 
   const revenueMonth = safeVolume * pvp;
   const totalCostMonth =
@@ -285,6 +288,7 @@ export function computeSimulation(input: {
     marginPct,
     contributionPerUnit,
     contributionPct,
+    breakEvenFixedMonthly,
     breakEvenUnits,
     revenueMonth,
     netIncomeMonth,
@@ -315,7 +319,7 @@ function evaluateSustainability(input: {
     ok: input.contributionPerUnit > 0,
     detail:
       input.contributionPerUnit > 0
-        ? `Cada unidad deja ${formatCop(input.contributionPerUnit)} para cubrir costos fijos.`
+        ? `Cada unidad deja ${formatCop(input.contributionPerUnit)} para cubrir costos fijos y nómina.`
         : "El precio no cubre el costo de insumos ni los indirectos.",
   });
 

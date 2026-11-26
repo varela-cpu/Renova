@@ -11,7 +11,7 @@ import {
 const adapter = new PrismaNeon({
   connectionString: process.env.DATABASE_URL as string,
 });
-const prisma = new (PrismaClient as any)({ adapter });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   await prisma.setting.deleteMany();

@@ -59,7 +59,7 @@ function Stat({
 }
 
 export default function DashboardPage() {
-  const { status, error, dataset, volume, setVolume, productId, setProductId, simulation, source } =
+  const { status, error, dataset, volume, setVolume, productId, setProductId, simulation } =
     useRenova();
 
   const products = useMemo(() => dataset?.products ?? [], [dataset?.products]);
@@ -215,7 +215,7 @@ export default function DashboardPage() {
               hint={
                 simulation.breakEvenUnits === Infinity
                   ? "Sin equilibrio con precio actual"
-                  : `Faltan/sobran: ${formatNumber(simulation.targetGap)} frente a meta`
+                  : `Incluye fijos + nómina: ${formatCopShort(simulation.breakEvenFixedMonthly)}`
               }
             />
           </div>
