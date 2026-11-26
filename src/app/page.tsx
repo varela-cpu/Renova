@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
+import { Wallet } from "lucide-react";
 import { useRenova } from "@/components/renova-provider";
 import { ProductViewer } from "@/components/three/product-viewer";
 import { formatCop, formatCopShort, formatNumber, formatPercent } from "@/lib/format";
@@ -345,6 +347,29 @@ export default function DashboardPage() {
             </table>
           </div>
         </Card>
+      </section>
+
+      <section className="card flex flex-wrap items-center justify-between gap-4 px-6 py-5">
+        <div className="flex items-center gap-4">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sage/25 text-forest">
+            <Wallet className="h-6 w-6" aria-hidden />
+          </span>
+          <div>
+            <p className="label-eyebrow">Módulo</p>
+            <h2 className="mt-1 font-display text-xl font-semibold text-forest">
+              Costos de personal
+            </h2>
+            <p className="text-sm text-forest/70">
+              Desglose del costo real de nómina por cargo, área y concepto.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/costos-personal"
+          className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream transition hover:bg-leaf"
+        >
+          Abrir módulo
+        </Link>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

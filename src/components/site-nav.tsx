@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "Panel" },
   { href: "/matriz/insumos", label: "Insumos" },
   { href: "/matriz/nomina", label: "Nómina" },
+  { href: "/costos-personal", label: "Costos de personal" },
   { href: "/recursos", label: "Recursos" },
   { href: "/parametros", label: "Parámetros" },
 ];
