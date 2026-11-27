@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRenova } from "@/components/renova-provider";
 import { formatCop } from "@/lib/format";
 import { CONTRACT_TYPES } from "@/lib/domain";
 import type { Employee } from "@/lib/domain";
+import { computePayroll } from "@/lib/calc";
 
 const EMPTY_EMPLOYEE: Omit<Employee, "id"> = {
   position: "",
   contractType: "Indefinido",
   headcount: 1,
   baseSalary: 0,
-  benefitsPct: 0.55,
+  benefitsPct: 0,
   sortOrder: 0,
 };
 
@@ -45,12 +46,10 @@ export default function NominaPage() {
   const [draft, setDraft] = useState<Omit<Employee, "id"> & { id?: string }>(EMPTY_EMPLOYEE);
   const [editing, setEditing] = useState<string | null>(null);
 
-  const sorted = [...employees].sort((a, b) => a.sortOrder - b.sortOrder);
-  const totalPeople = sorted.reduce((acc, e) => acc + e.headcount, 0);
-  const totalMonth = sorted.reduce(
-    (acc, e) => acc + e.baseSalary * (1 + e.benefitsPct) * e.headcount,
-    0,
-  );
+  const payroll = useMemo(() => computePayroll(employees, 1), [employees]);
+  const sorted = payroll.rows;
+  const totalPeople = payroll.totalPeople;
+  const totalMonth = payroll.totalMonth;
 
   const startEdit = (employee: Employee) => {
     setEditing(employee.id);
@@ -73,7 +72,8 @@ export default function NominaPage() {
         <p className="label-eyebrow">Matriz</p>
         <h1 className="mt-2 font-display text-3xl font-semibold text-forest">Nómina</h1>
         <p className="mt-1 text-forest/70">
-          Cargos, tipo de contrato, número de personas, salario base y prestaciones.
+          Nómina con liquidación detallada (prestaciones, aportes, auxilio). Control de calidad externo:{" "}
+          {formatCop(payroll.externalQualityMonth)}/mes aparte.
         </p>
       </header>
 
@@ -117,8 +117,13 @@ export default function NominaPage() {
           </label>
           <Input label="Personas" type="number" value={draft.headcount} onChange={(v) => setDraft((d) => ({ ...d, headcount: Number(v) || 0 }))} />
           <Input label="Salario base (COP)" type="number" value={draft.baseSalary} onChange={(v) => setDraft((d) => ({ ...d, baseSalary: Number(v) || 0 }))} />
-          <Input label="Prestaciones (decimal)" type="number" value={draft.benefitsPct} onChange={(v) => setDraft((d) => ({ ...d, benefitsPct: Number(v) || 0 }))} />
           <Input label="Orden" type="number" value={draft.sortOrder} onChange={(v) => setDraft((d) => ({ ...d, sortOrder: Number(v) || 0 }))} />
+          <div className="flex flex-col gap-1 text-sm text-forest">
+            <span className="label-eyebrow">Prestaciones/cargas</span>
+            <div className="rounded-xl border border-sage/40 bg-sage/10 px-3 py-2 text-forest/70">
+              Calculadas automáticamente por liquidación detallada
+            </div>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t border-sage/40 px-6 py-4">
           <button onClick={submit} className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream">
@@ -151,17 +156,15 @@ export default function NominaPage() {
             </thead>
             <tbody className="divide-y divide-sage/30">
               {sorted.map((employee) => {
-                const costPerPerson = employee.baseSalary * (1 + employee.benefitsPct);
-                const costMonth = costPerPerson * employee.headcount;
                 return (
                   <tr key={employee.id}>
                     <td className="px-6 py-3 font-semibold text-forest">{employee.position}</td>
                     <td className="px-6 py-3 text-forest/70">{employee.contractType}</td>
                     <td className="px-6 py-3 text-right text-forest">{employee.headcount}</td>
                     <td className="px-6 py-3 text-right text-forest">{formatCop(employee.baseSalary)}</td>
-                    <td className="px-6 py-3 text-right text-forest/70">{(employee.benefitsPct * 100).toFixed(0)}%</td>
-                    <td className="px-6 py-3 text-right text-forest">{formatCop(costPerPerson)}</td>
-                    <td className="px-6 py-3 text-right font-medium text-forest">{formatCop(costMonth)}</td>
+                    <td className="px-6 py-3 text-right text-forest/70">{(employee.benefitsPct * 100).toFixed(2)}%</td>
+                    <td className="px-6 py-3 text-right text-forest">{formatCop(employee.costPerPerson)}</td>
+                    <td className="px-6 py-3 text-right font-medium text-forest">{formatCop(employee.costTotalMonth)}</td>
                     <td className="px-6 py-3 text-right">
                       <button onClick={() => startEdit(employee)} className="px-3 py-1 text-forest/70">
                         Editar

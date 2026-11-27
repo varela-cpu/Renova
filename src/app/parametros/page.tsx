@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRenova } from "@/components/renova-provider";
@@ -25,7 +25,7 @@ export default function ParametrosPage() {
   };
 
   const reset = async () => {
-    if (confirm("¿Restablecer todo el dataset a los valores semilla de la ficha técnica?")) {
+    if (confirm("Â¿Restablecer todo el dataset a los valores semilla de la ficha tÃ©cnica?")) {
       await resetDataset();
     }
   };
@@ -33,10 +33,10 @@ export default function ParametrosPage() {
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <p className="label-eyebrow">Parámetros</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-forest">Configuración del simulador</h1>
+        <p className="label-eyebrow">ParÃ¡metros</p>
+        <h1 className="mt-2 font-display text-3xl font-semibold text-forest">ConfiguraciÃ³n del simulador</h1>
         <p className="mt-1 text-forest/70">
-          IVA, costos indirectos, meta mensual, presentación activa y umbral de sostenibilidad.
+          IVA, costos indirectos, meta mensual, presentaciÃ³n activa y umbral de sostenibilidad.
         </p>
       </header>
 
@@ -94,7 +94,7 @@ export default function ParametrosPage() {
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-forest">
-            <span className="label-eyebrow">Margen mínimo para sostenibilidad</span>
+            <span className="label-eyebrow">Margen mÃ­nimo para sostenibilidad</span>
             <input
               type="number"
               step="0.01"
@@ -106,7 +106,7 @@ export default function ParametrosPage() {
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-forest">
-            <span className="label-eyebrow">Presentación activa</span>
+            <span className="label-eyebrow">PresentaciÃ³n activa</span>
             <select
               value={form.activeProductId}
               onChange={(event) => setForm((f) => ({ ...f, activeProductId: event.target.value }))}
@@ -122,13 +122,13 @@ export default function ParametrosPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t border-sage/40 px-6 py-4">
           <button onClick={submit} className="rounded-full bg-forest px-5 py-2 text-sm font-semibold text-cream">
-            Guardar parámetros
+            Guardar parÃ¡metros
           </button>
           <button onClick={reset} className="rounded-full px-5 py-2 text-sm font-semibold text-coral">
             Restablecer dataset
           </button>
           <p className="text-sm text-forest/60">
-            IVA {formatPercent(form.ivaPct)}, Indirectos {formatPercent(form.indirectPct)}, Margen mínimo{" "}
+            IVA {formatPercent(form.ivaPct)}, Indirectos {formatPercent(form.indirectPct)}, Margen mÃ­nimo{" "}
             {formatPercent(form.minMarginPct)}
           </p>
         </div>
@@ -136,3 +136,4 @@ export default function ParametrosPage() {
     </div>
   );
 }
+

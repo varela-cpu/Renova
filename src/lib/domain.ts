@@ -25,6 +25,7 @@ export type Employee = {
   contractType: string;
   headcount: number;
   baseSalary: number;
+  /** factor de apropiaciones sobre salario (auxilio + cargas) */
   benefitsPct: number;
   sortOrder: number;
 };
@@ -84,9 +85,10 @@ export const DEFAULT_SETTINGS: Settings = {
   currency: "COP",
   ivaPct: 0.19,
   indirectPct: 0.08,
-  targetUnits: 49208,
-  activeProductId: "prd-005",
-  monthlyVolume: 49208,
+  // Demanda 2027: 221.435 kg (7% Caldas), bolsa 3,9 kg = 56.778 uds/año
+  targetUnits: 4_732,
+  activeProductId: "prd-039",
+  monthlyVolume: 4_732,
   minMarginPct: 0.2,
 };
 

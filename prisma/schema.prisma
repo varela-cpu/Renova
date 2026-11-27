@@ -1,5 +1,5 @@
-// RENOVA - Modelo de datos
-// Base: ficha técnica preliminar del producto (REN-DET-003 / REN-DET-005)
+﻿// RENOVA - Modelo de datos
+// Base: ficha tÃ©cnica preliminar del producto (REN-DET-003 / REN-DET-005)
 
 generator client {
   provider = "prisma-client"
@@ -12,8 +12,8 @@ datasource db {
 }
 
 /// Materiales e insumos directos.
-/// La cantidad por unidad se deriva de la composición porcentual de la ficha
-/// técnica (% en masa del producto terminado) o de unidades por unidad de venta.
+/// La cantidad por unidad se deriva de la composiciÃ³n porcentual de la ficha
+/// tÃ©cnica (% en masa del producto terminado) o de unidades por unidad de venta.
 model Material {
   id              String   @id @default(cuid())
   name            String
@@ -35,17 +35,17 @@ model Material {
   @@index([sortOrder])
 }
 
-/// Nómina de personal.
+/// NÃ³mina de personal.
 model Employee {
   id           String   @id @default(cuid())
   position     String
-  /// Indefinido | Temporal | Prestación de servicios
+  /// Indefinido | Temporal | PrestaciÃ³n de servicios
   contractType String   @default("Indefinido")
   headcount    Int      @default(1)
   /// salario base mensual en COP
   baseSalary   Float    @default(0)
-  /// factor de prestaciones y aportes (0.55 = 55%)
-  benefitsPct  Float    @default(0.55)
+  /// factor de apropiaciones sobre salario base (calculado por liquidación detallada)
+  benefitsPct  Float    @default(0)
   sortOrder    Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -84,8 +84,9 @@ model Product {
   updatedAt DateTime @updatedAt
 }
 
-/// Parámetros de la simulación (clave/valor serializado en JSON).
+/// ParÃ¡metros de la simulaciÃ³n (clave/valor serializado en JSON).
 model Setting {
   key   String @id
   value String
 }
+
