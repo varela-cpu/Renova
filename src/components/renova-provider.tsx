@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   createContext,
@@ -30,7 +30,7 @@ type RenovaContextValue = {
   /** volumen mensual simulado */
   volume: number;
   setVolume: (value: number) => void;
-  /** presentación activa */
+  /** presentaciÃ³n activa */
   productId: string;
   setProductId: (id: string) => void;
   simulation: Simulation | null;
@@ -55,8 +55,8 @@ export function RenovaProvider({ children }: { children: ReactNode }) {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [dataset, setDataset] = useState<Dataset | null>(null);
   const [source, setSource] = useState<"postgres" | "local" | null>(null);
-  const [volume, setVolumeState] = useState(100000);
-  const [productId, setProductIdState] = useState("prd-005");
+  const [volume, setVolumeState] = useState(4732);
+  const [productId, setProductIdState] = useState("prd-039");
 
   const refresh = useCallback(async () => {
     try {
@@ -293,3 +293,4 @@ export function useRenova(): RenovaContextValue {
   }
   return context;
 }
+

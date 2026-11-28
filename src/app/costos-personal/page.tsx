@@ -23,11 +23,14 @@ import {
 } from "recharts";
 import {
   empleados,
-  FACTOR_CARGA,
+  FACTOR_CARGA_PROMEDIO,
   TASAS_CARGA,
   TASAS_DEDUCCION,
-} from "../../../data/payroll";
-import type { Empleado, PayrollArea } from "../../../data/payroll";
+  EXTERNAL_QUALITY_MONTHLY,
+  SMMLV_2026,
+  AUXILIO_TRANSPORTE_2026,
+} from "@/lib/payroll";
+import type { Empleado, PayrollArea } from "@/lib/payroll";
 import { formatCop, formatCopShort, formatNumber, formatPercent } from "@/lib/format";
 
 const COLORS = ["#145b45", "#287a5d", "#e8b14c", "#f07863", "#a2b99a"];
@@ -172,7 +175,7 @@ export default function CostosPersonalPage() {
           icon={TrendingUp}
           label="Salario base"
           value={formatCopShort(totals.base)}
-          hint={`Factor de carga ${formatPercent(FACTOR_CARGA, 0)}`}
+          hint={`Factor promedio ${FACTOR_CARGA_PROMEDIO.toFixed(2)}x · Calidad ext. ${formatCopShort(EXTERNAL_QUALITY_MONTHLY)}`}
         />
         <StatCard
           icon={ShieldCheck}
@@ -282,9 +285,9 @@ export default function CostosPersonalPage() {
                 </span>
               </div>
               <p className="mt-2 pl-6 text-sm text-forest/70">
-                Salud {formatPercent(TASAS_CARGA.salud)} · Pensión{" "}
-                {formatPercent(TASAS_CARGA.pension)} · ARL{" "}
-                {formatPercent(TASAS_CARGA.arl)}
+                Salud empleador {formatPercent(TASAS_CARGA.exonerados.salud)} (exonerada) · Pensión{" "}
+                {formatPercent(TASAS_CARGA.aportes.pension)} · ARL{" "}
+                {formatPercent(TASAS_CARGA.aportes.arl)}
               </p>
             </div>
             <div className="rounded-2xl border border-sage/40 px-4 py-3">
@@ -298,10 +301,10 @@ export default function CostosPersonalPage() {
                 </span>
               </div>
               <p className="mt-2 pl-6 text-sm text-forest/70">
-                Cesantías {formatPercent(TASAS_CARGA.cesantias)} · Prima{" "}
-                {formatPercent(TASAS_CARGA.prima)} · Vacaciones{" "}
-                {formatPercent(TASAS_CARGA.vacaciones)} · Intereses{" "}
-                {formatPercent(TASAS_CARGA.interesesCesantias)}
+                Cesantías {formatPercent(TASAS_CARGA.prestaciones.cesantias)} · Prima{" "}
+                {formatPercent(TASAS_CARGA.prestaciones.prima)} · Vacaciones{" "}
+                {formatPercent(TASAS_CARGA.prestaciones.vacaciones)} · Intereses{" "}
+                {formatPercent(TASAS_CARGA.prestaciones.interesesCesantias)}
               </p>
             </div>
             <div className="rounded-2xl border border-sage/40 px-4 py-3">
@@ -315,9 +318,9 @@ export default function CostosPersonalPage() {
                 </span>
               </div>
               <p className="mt-2 pl-6 text-sm text-forest/70">
-                Caja {formatPercent(TASAS_CARGA.caja)} · ICBF{" "}
-                {formatPercent(TASAS_CARGA.icbf)} · SENA{" "}
-                {formatPercent(TASAS_CARGA.sena)}
+                Caja {formatPercent(TASAS_CARGA.aportes.caja)} · ICBF{" "}
+                {formatPercent(TASAS_CARGA.exonerados.icbf)} · SENA{" "}
+                {formatPercent(TASAS_CARGA.exonerados.sena)} (exonerados art. 114-1 E.T.)
               </p>
             </div>
             <div className="flex items-center justify-between rounded-2xl bg-forest px-4 py-3 text-cream">
@@ -398,7 +401,7 @@ export default function CostosPersonalPage() {
                 <td className="py-3 text-right">{formatCop(totals.cargas)}</td>
                 <td className="py-3 text-right">{formatCop(totals.deducciones)}</td>
                 <td className="py-3 text-right">{formatCop(totals.costo)}</td>
-                <td className="py-3 text-right">{FACTOR_CARGA.toFixed(2)}x</td>
+                <td className="py-3 text-right">{FACTOR_CARGA_PROMEDIO.toFixed(2)}x</td>
               </tr>
             </tbody>
           </table>
@@ -408,10 +411,10 @@ export default function CostosPersonalPage() {
       <div className="card flex items-start gap-3 px-6 py-5">
         <Info className="mt-0.5 h-5 w-5 shrink-0 text-leaf" aria-hidden />
         <p className="text-sm text-forest/70">
-          Modelo ilustrativo con salarios de ejemplo y factor de carga del{" "}
-          {formatPercent(FACTOR_CARGA, 0)}. No es una liquidación de nómina: tasas,
-          exoneraciones, auxilio de transporte y obligaciones laborales deben
-          validarse con contabilidad antes de usar estos valores en un presupuesto real.
+          Liquidación detallada 2026: SMMLV {formatCop(SMMLV_2026)} · auxilio de transporte{" "}
+          {formatCop(AUXILIO_TRANSPORTE_2026)} (hasta 2 SMMLV). Cesantías/prima sobre salario+auxilio;
+          vacaciones sobre salario; aportes sobre salario. Salud, ICBF y SENA en 0% por exoneración
+          art. 114-1 E.T. Control de calidad externo: {formatCop(EXTERNAL_QUALITY_MONTHLY)}/mes (aparte).
         </p>
       </div>
     </div>

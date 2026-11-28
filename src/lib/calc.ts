@@ -13,6 +13,7 @@ import type {
   Resource,
   Settings,
 } from "./domain";
+import { liquidatePayrollEmployee, EXTERNAL_QUALITY_MONTHLY } from "./payroll";
 
 export type MaterialRow = Material & {
   /** cantidad por unidad de venta (kg / und) */
@@ -34,7 +35,22 @@ export type MaterialSummary = {
 };
 
 export type PayrollRow = Employee & {
-  /** costo por persona (salario base + prestaciones) */
+  auxilioTransporte: number;
+  cesantias: number;
+  prima: number;
+  interesesCesantias: number;
+  vacaciones: number;
+  pensionEmpleador: number;
+  arl: number;
+  caja: number;
+  saludEmpleador: number;
+  icbf: number;
+  sena: number;
+  totalApropiaciones: number;
+  deduccionSalud: number;
+  deduccionPension: number;
+  netoPagado: number;
+  /** costo por persona (salario + auxilio + apropiaciones) */
   costPerPerson: number;
   /** costo total del mes para el cargo */
   costTotalMonth: number;
@@ -45,6 +61,7 @@ export type PayrollSummary = {
   totalMonth: number;
   totalPeople: number;
   costPerUnit: number;
+  externalQualityMonth: number;
 };
 
 export type ResourceSummary = {
@@ -161,20 +178,47 @@ export function computePayroll(
   const rows: PayrollRow[] = [...employees]
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((employee) => {
-      const costPerPerson = employee.baseSalary * (1 + employee.benefitsPct);
+      const liq = liquidatePayrollEmployee({
+        id: employee.id,
+        position: employee.position,
+        contractType: employee.contractType,
+        headcount: employee.headcount,
+        baseSalary: employee.baseSalary,
+        area: "Producción",
+        sortOrder: employee.sortOrder,
+      });
+      const costPerPerson = liq.costoEmpresa / Math.max(1, liq.headcount);
       return {
         ...employee,
+        benefitsPct: liq.benefitsPct,
+        auxilioTransporte: liq.auxilioTransporte,
+        cesantias: liq.cesantias,
+        prima: liq.prima,
+        interesesCesantias: liq.interesesCesantias,
+        vacaciones: liq.vacaciones,
+        pensionEmpleador: liq.pensionEmpleador,
+        arl: liq.arl,
+        caja: liq.caja,
+        saludEmpleador: liq.saludEmpleador,
+        icbf: liq.icbf,
+        sena: liq.sena,
+        totalApropiaciones: liq.totalApropiaciones,
+        deduccionSalud: liq.deduccionSalud,
+        deduccionPension: liq.deduccionPension,
+        netoPagado: liq.netoPagado,
         costPerPerson,
-        costTotalMonth: costPerPerson * employee.headcount,
+        costTotalMonth: liq.costoEmpresa,
       };
     });
 
-  const totalMonth = rows.reduce((acc, r) => acc + r.costTotalMonth, 0);
+  const payrollMonth = rows.reduce((acc, r) => acc + r.costTotalMonth, 0);
+  const totalMonth = payrollMonth + EXTERNAL_QUALITY_MONTHLY;
   return {
     rows,
     totalMonth,
     totalPeople: rows.reduce((acc, r) => acc + r.headcount, 0),
     costPerUnit: volume > 0 ? totalMonth / volume : 0,
+    externalQualityMonth: EXTERNAL_QUALITY_MONTHLY,
   };
 }
 

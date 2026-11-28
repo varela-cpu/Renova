@@ -1,30 +1,25 @@
 /**
- * Datos semilla de RENOVA.
+ * Datos semilla de RENOVA - fuente única para seed/repository/reset.
  *
- * La composición porcentual de insumos proviene de la ficha técnica preliminar
- * (RENOVA | FICHA TÉCNICA DEL PRODUCTO, composición de referencia).
- * Los costos unitarios son ESTIMACIONES de referencia en COP y quedan
- * editables desde la aplicación: la ficha técnica declara que la fórmula
- * final y los costos de maquila están por validar.
+ * La composición de insumos usa la fórmula B optimizada de la plantilla
+ * (10 % LAS, 20 % carbonato, 45 % sulfato, 5 % silicato, 10 % percarbonato,
+ * 7 % zeolita, 1 % CMC, 2 % fragancia). Los costos unitarios son referencia editable.
  */
 
 import type { Employee, Material, Product, Resource, Settings } from "./domain";
 import { DEFAULT_SETTINGS } from "./domain";
+import { PAYROLL_SEED, auxilioTransporteForSalary, liquidatePayrollEmployee } from "./payroll";
+
+export const EXTERNAL_QUALITY_MONTHLY = 1_500_000;
 
 export const seedProducts: Product[] = [
   {
-    id: "prd-005",
-    code: "REN-DET-005",
-    name: "Detergente en polvo para ropa",
-    weightKg: 5,
-    pvp: 21900,
-  },
-  {
-    id: "prd-003",
-    code: "REN-DET-003",
-    name: "Detergente en polvo para ropa",
-    weightKg: 3,
-    pvp: 14900,
+    id: "prd-039",
+    code: "REN-DET-039",
+    name: "Detergente en polvo RENOVA",
+    weightKg: 3.9,
+    // $39.900 con IVA incluido (19%) => PVP sin IVA
+    pvp: Math.round((39_900 / 1.19) * 100) / 100,
   },
 ];
 
@@ -126,28 +121,16 @@ export const seedMaterials: Material[] = [
     sortOrder: 8,
   },
   {
-    id: "mat-empaque",
-    name: "Envase rígido de fibra de bagazo con barrera contra humedad (5 kg)",
+    id: "mat-empaque-039",
+    name: "Envase rígido de fibra de bagazo con barrera contra humedad (3,9 kg)",
     supplier: "Corrugados de Risaralda",
-    reference: "ENV-BAG-005",
+    reference: "ENV-BAG-039",
     unit: "und",
     compositionPct: null,
     unitsPerProduct: 1,
-    unitCost: 3500,
+    unitCost: 3200,
     isPackaging: true,
     sortOrder: 9,
-  },
-  {
-    id: "mat-empaque-3",
-    name: "Envase rígido de fibra de bagazo con barrera contra humedad (3 kg)",
-    supplier: "Corrugados de Risaralda",
-    reference: "ENV-BAG-003",
-    unit: "und",
-    compositionPct: null,
-    unitsPerProduct: 1,
-    unitCost: 2800,
-    isPackaging: true,
-    sortOrder: 10,
   },
   {
     id: "mat-etiqueta",
@@ -159,7 +142,7 @@ export const seedMaterials: Material[] = [
     unitsPerProduct: 1,
     unitCost: 600,
     isPackaging: true,
-    sortOrder: 11,
+    sortOrder: 10,
   },
   {
     id: "mat-transporte",
@@ -171,75 +154,24 @@ export const seedMaterials: Material[] = [
     unitsPerProduct: 1,
     unitCost: 0,
     isPackaging: false,
-    sortOrder: 12,
+    sortOrder: 11,
   },
 ];
 
-export const seedEmployees: Employee[] = [
-  {
-    id: "emp-coord",
-    position: "Coordinador/jefe de producción",
-    contractType: "Indefinido",
-    headcount: 1,
-    baseSalary: 3500000,
-    benefitsPct: 0.55,
-    sortOrder: 1,
-  },
-  {
-    id: "emp-pesaje",
-    position: "Operario de pesaje y preparación",
-    contractType: "Indefinido",
-    headcount: 1,
-    baseSalary: 2000000,
-    benefitsPct: 0.55,
-    sortOrder: 2,
-  },
-  {
-    id: "emp-mezcla",
-    position: "Operario de mezclado",
-    contractType: "Indefinido",
-    headcount: 1,
-    baseSalary: 2200000,
-    benefitsPct: 0.55,
-    sortOrder: 3,
-  },
-  {
-    id: "emp-llenado",
-    position: "Operarios de llenado y empaque",
-    contractType: "Indefinido",
-    headcount: 2,
-    baseSalary: 1900000,
-    benefitsPct: 0.55,
-    sortOrder: 4,
-  },
-  {
-    id: "emp-calidad",
-    position: "Analista de calidad (función combinada)",
-    contractType: "Indefinido",
-    headcount: 1,
-    baseSalary: 2400000,
-    benefitsPct: 0.55,
-    sortOrder: 5,
-  },
-  {
-    id: "emp-bodega",
-    position: "Auxiliar de bodega y despacho",
-    contractType: "Indefinido",
-    headcount: 1,
-    baseSalary: 1900000,
-    benefitsPct: 0.55,
-    sortOrder: 6,
-  },
-  {
-    id: "emp-aux",
-    position: "Auxiliar de producción/limpieza",
-    contractType: "Indefinido",
-    headcount: 1,
-    baseSalary: 2200000,
-    benefitsPct: 0.55,
-    sortOrder: 7,
-  },
-];
+export const seedEmployees: Employee[] = PAYROLL_SEED.map((seed) => {
+  const liquidated = liquidatePayrollEmployee(seed);
+  return {
+    id: seed.id,
+    position: seed.position,
+    contractType: seed.contractType,
+    headcount: seed.headcount,
+    baseSalary: seed.baseSalary,
+    benefitsPct: liquidated.benefitsPct,
+    sortOrder: seed.sortOrder,
+  };
+});
+
+export { auxilioTransporteForSalary };
 
 export const seedResources: Resource[] = [
   // Tangibles
@@ -491,5 +423,7 @@ export const seedResources: Resource[] = [
 
 export const seedSettings: Settings = {
   ...DEFAULT_SETTINGS,
-  activeProductId: "prd-005",
+  activeProductId: "prd-039",
+  targetUnits: Math.round(221_435 / 12),
+  monthlyVolume: Math.round(221_435 / 12),
 };

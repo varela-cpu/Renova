@@ -1,3 +1,4 @@
+﻿import "dotenv/config";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { DEFAULT_SETTINGS } from "../src/lib/domain";
@@ -6,6 +7,7 @@ import {
   seedMaterials,
   seedProducts,
   seedResources,
+  seedSettings,
 } from "../src/lib/seed-data";
 
 const adapter = new PrismaNeon({
@@ -21,76 +23,24 @@ async function main() {
   await prisma.material.deleteMany();
 
   for (const material of seedMaterials) {
-    await prisma.material.create({
-      data: {
-        id: material.id,
-        name: material.name,
-        supplier: material.supplier,
-        reference: material.reference,
-        unit: material.unit,
-        compositionPct: material.compositionPct,
-        unitsPerProduct: material.unitsPerProduct,
-        unitCost: material.unitCost,
-        isPackaging: material.isPackaging,
-        sortOrder: material.sortOrder,
-      },
-    });
+    await prisma.material.create({ data: { ...material } });
   }
-
   for (const employee of seedEmployees) {
-    await prisma.employee.create({
-      data: {
-        id: employee.id,
-        position: employee.position,
-        contractType: employee.contractType,
-        headcount: employee.headcount,
-        baseSalary: employee.baseSalary,
-        benefitsPct: employee.benefitsPct,
-        sortOrder: employee.sortOrder,
-      },
-    });
+    await prisma.employee.create({ data: { ...employee } });
   }
-
   for (const resource of seedResources) {
-    await prisma.resource.create({
-      data: {
-        id: resource.id,
-        kind: resource.kind,
-        concept: resource.concept,
-        detail: resource.detail,
-        value: resource.value,
-        recurrence: resource.recurrence,
-        sortOrder: resource.sortOrder,
-      },
-    });
+    await prisma.resource.create({ data: { ...resource } });
   }
-
   for (const product of seedProducts) {
-    await prisma.product.create({
-      data: {
-        id: product.id,
-        code: product.code,
-        name: product.name,
-        weightKg: product.weightKg,
-        pvp: product.pvp,
-      },
-    });
+    await prisma.product.create({ data: { ...product } });
   }
-
-  for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
-    await prisma.setting.create({
-      data: { key, value: JSON.stringify(value) },
-    });
+  const settings = { ...DEFAULT_SETTINGS, ...seedSettings };
+  for (const [key, value] of Object.entries(settings)) {
+    await prisma.setting.create({ data: { key, value: JSON.stringify(value) } });
   }
-
   console.log("Semilla RENOVA cargada correctamente.");
 }
 
 main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((error) => { console.error(error); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });
